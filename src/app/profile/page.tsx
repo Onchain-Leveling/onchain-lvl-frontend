@@ -164,13 +164,6 @@ export default function Profile() {
             View Daily Tasks
           </Link>
         </div>
-
-        <Link
-          href="/"
-          className="flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors"
-        >
-          ← Back to Home
-        </Link>
       </div>
       <BottomNavbar />
     </div>

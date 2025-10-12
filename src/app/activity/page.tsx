@@ -93,20 +93,13 @@ export default function ActivitySelection() {
             </div>
 
             <Link
-              href={`/tasks?character=${character}&activity=${selectedActivity}&minutes=${minutes}&distance=${distance}`}
+              href={`/quest?character=${character}&activity=${selectedActivity}&minutes=${minutes}&distance=${distance}`}
               className="inline-flex items-center justify-center w-full px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
             >
               Start Quest
             </Link>
           </div>
         )}
-
-        <Link
-          href="/"
-          className="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors"
-        >
-          ← Back to Character Selection
-        </Link>
       </div>
       <BottomNavbar />
     </div>

@@ -32,7 +32,12 @@ export default function DailyTasks() {
     if (activity && distance) {
       setTasks(prevTasks => 
         prevTasks.map(task => {
-          if (task.id === activity + "ing") {
+          const taskActivityMap = {
+            "run": "running",
+            "walk": "walking"
+          };
+          
+          if (task.id === taskActivityMap[activity as keyof typeof taskActivityMap]) {
             const newCurrent = Math.min(task.current + Number(distance), task.target);
             return {
               ...task,
@@ -122,22 +127,33 @@ export default function DailyTasks() {
                 </div>
               </div>
 
-              {!task.completed && (
-                <div className="flex space-x-2">
+              <div className="flex space-x-2">
+                {!task.completed && (
                   <button
                     onClick={() => updateTask(task.id, task.id === "situps" ? 1 : 0.5)}
                     className="flex-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors text-sm"
                   >
                     +{task.id === "situps" ? "1" : "0.5"} {task.unit}
                   </button>
-                  <button
-                    onClick={() => updateTask(task.id, task.target - task.current)}
-                    className="flex-1 px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors text-sm"
-                  >
-                    Complete
-                  </button>
-                </div>
-              )}
+                )}
+                <button
+                  onClick={() => {
+                    if (!task.completed) {
+                      updateTask(task.id, task.target - task.current);
+                    } else {
+                      // TODO: Implement onchain transaction
+                      console.log("Claim EXP:", task.title);
+                    }
+                  }}
+                  className={`${!task.completed ? "flex-1" : "w-full"} px-3 py-2 rounded-md transition-colors text-sm font-medium ${
+                    task.completed
+                      ? "bg-green-500 text-white hover:bg-green-600"
+                      : "bg-blue-500 text-white hover:bg-blue-600"
+                  }`}
+                >
+                  {task.completed ? "Claim EXP" : "Complete"}
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -157,13 +173,6 @@ export default function DailyTasks() {
             Add Another Activity
           </Link>
         </div>
-
-        <Link
-          href="/"
-          className="flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors"
-        >
-          ← Back to Home
-        </Link>
       </div>
       <BottomNavbar />
     </div>
