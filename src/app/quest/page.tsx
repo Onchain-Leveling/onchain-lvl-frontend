@@ -6,13 +6,15 @@ import Lottie from "lottie-react";
 import hamsterRun from "../../../public/Assets/Animation/hamster-run.json";
 import boxWalking from "../../../public/Assets/Animation/box-walking.json";
 import BottomNavbar from "../../components/BottomNavbar";
-import { Play, Pause, Square } from "lucide-react";
+import ShareProgress from "../../components/ShareProgress";
+import { Play, Pause, Square, Share2 } from "lucide-react";
 
 export default function QuestPage() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [isActive, setIsActive] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -147,12 +149,21 @@ export default function QuestPage() {
                   Great job! You completed your {distance}km {activity}ing session.
                 </p>
               </div>
-              <button
-                onClick={handleComplete}
-                className="w-full px-6 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-lg"
-              >
-                Complete Quest & Earn XP
-              </button>
+              <div className="space-y-3">
+                <button
+                  onClick={() => setShowShareModal(true)}
+                  className="w-full flex items-center justify-center space-x-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                >
+                  <Share2 className="w-5 h-5" />
+                  <span>Share Progress</span>
+                </button>
+                <button
+                  onClick={handleComplete}
+                  className="w-full px-6 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-lg"
+                >
+                  Complete Quest & Earn XP
+                </button>
+              </div>
             </div>
           ) : (
             <div className="flex space-x-4 w-full">
@@ -201,6 +212,16 @@ export default function QuestPage() {
           </div>
         </div>
       </div>
+      
+      {showShareModal && (
+        <ShareProgress
+          activity={activity}
+          distance={distance}
+          minutes={minutes}
+          character={character}
+          onClose={() => setShowShareModal(false)}
+        />
+      )}
       
       <BottomNavbar />
     </div>
