@@ -13,6 +13,13 @@ export default function Profile() {
   const character = searchParams.get("character") || "degen";
   const xp = Number(searchParams.get("xp")) || 0;
   
+  // Mock user data - in real app this would come from user session/API
+  const mockUserData = {
+    username: character === "degen" ? "CryptoDegen123" : "FitnessRunner",
+    name: character === "degen" ? "Alex Chen" : "Sarah Johnson",
+    joinDate: "Oct 2024"
+  };
+  
   const level = Math.floor(xp / 300) + 1;
   const xpForNextLevel = (level * 300) - xp;
   const xpProgress = ((xp % 300) / 300) * 100;
@@ -52,10 +59,17 @@ export default function Profile() {
           </div>
           
           <div>
-            <h1 className="text-3xl font-semibold text-gray-900">
-              {currentCharacter.name}
+            <h1 className="text-2xl font-bold text-gray-900">
+              {mockUserData.name}
             </h1>
-            <p className="text-gray-600">{currentCharacter.description}</p>
+            <p className="text-sm text-gray-600">@{mockUserData.username}</p>
+            <div className="flex items-center justify-center space-x-2 mt-2">
+              <span className="text-xs text-gray-500">Playing as</span>
+              <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
+                {currentCharacter.name} {currentCharacter.name === "Degen" ? "🦍" : "🏃‍♂️"}
+              </span>
+              <span className="text-xs text-gray-500">• Joined {mockUserData.joinDate}</span>
+            </div>
           </div>
         </div>
 
@@ -162,6 +176,13 @@ export default function Profile() {
             className="inline-flex items-center justify-center w-full px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
           >
             View Daily Tasks
+          </Link>
+          
+          <Link
+            href="/leaderboard"
+            className="inline-flex items-center justify-center w-full px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-lg hover:from-amber-600 hover:to-orange-700 transition-all font-medium shadow-md"
+          >
+            🏆 View Leaderboard
           </Link>
         </div>
       </div>

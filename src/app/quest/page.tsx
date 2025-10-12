@@ -94,19 +94,19 @@ export default function QuestPage() {
   const currentActivity = activityData[activity as keyof typeof activityData] || activityData.run;
 
   return (
-    <div className="min-h-screen bg-white p-8 pb-20">
-      <div className="max-w-md mx-auto space-y-8">
-        <div className="text-center space-y-4">
-          <h1 className="text-3xl font-semibold text-gray-900">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4 pb-20">
+      <div className="max-w-sm w-full space-y-6">
+        <div className="text-center space-y-2">
+          <h1 className="text-2xl font-bold text-gray-900">
             {currentActivity.name} Quest
           </h1>
-          <p className="text-gray-600">
+          <p className="text-sm text-gray-600">
             Target: {distance}km in {minutes} minutes
           </p>
         </div>
 
-        <div className="flex flex-col items-center space-y-8">
-          <div className="w-48 h-48">
+        <div className="flex flex-col items-center space-y-6">
+          <div className="w-32 h-32">
             <Lottie 
               animationData={currentActivity.animation} 
               loop={isActive && !isPaused} 
@@ -114,101 +114,101 @@ export default function QuestPage() {
             />
           </div>
 
-          <div className={`text-center p-8 rounded-full border-8 ${
+          <div className={`text-center p-6 rounded-2xl border-4 ${
             isCompleted 
-              ? "border-green-500 bg-green-50" 
+              ? "border-emerald-400 bg-emerald-50" 
               : isActive 
                 ? currentActivity.color === "blue" 
-                  ? "border-blue-500 bg-blue-50" 
-                  : "border-green-500 bg-green-50"
+                  ? "border-blue-400 bg-blue-50" 
+                  : "border-emerald-400 bg-emerald-50"
                 : "border-gray-300 bg-gray-50"
           }`}>
-            <div className={`text-6xl font-mono font-bold ${
+            <div className={`text-4xl font-mono font-bold ${
               isCompleted 
-                ? "text-green-600" 
+                ? "text-emerald-600" 
                 : isActive 
                   ? currentActivity.color === "blue" 
                     ? "text-blue-600" 
-                    : "text-green-600"
+                    : "text-emerald-600"
                   : "text-gray-600"
             }`}>
               {formatTime(timeLeft)}
             </div>
-            <p className="text-sm text-gray-600 mt-2">
+            <p className="text-xs text-gray-600 mt-1">
               {isCompleted ? "Completed!" : isActive ? "In Progress" : "Ready to Start"}
             </p>
           </div>
 
           {isCompleted ? (
-            <div className="space-y-4 w-full">
-              <div className="p-4 bg-green-50 rounded-lg text-center">
-                <h3 className="text-lg font-semibold text-green-800 mb-2">
+            <div className="space-y-3 w-full">
+              <div className="p-3 bg-emerald-50 rounded-xl text-center border border-emerald-200">
+                <h3 className="text-sm font-semibold text-emerald-800 mb-1">
                   🎉 Quest Completed!
                 </h3>
-                <p className="text-green-600">
-                  Great job! You completed your {distance}km {activity}ing session.
+                <p className="text-xs text-emerald-600">
+                  {distance}km {activity}ing session done!
                 </p>
               </div>
-              <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => setShowShareModal(true)}
-                  className="w-full flex items-center justify-center space-x-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                  className="flex items-center justify-center space-x-1 px-3 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors font-medium text-sm"
                 >
-                  <Share2 className="w-5 h-5" />
-                  <span>Share Progress</span>
+                  <Share2 className="w-4 h-4" />
+                  <span>Share</span>
                 </button>
                 <button
                   onClick={handleComplete}
-                  className="w-full px-6 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-lg"
+                  className="flex items-center justify-center px-3 py-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-colors font-medium text-sm"
                 >
-                  Complete Quest & Earn XP
+                  Earn XP
                 </button>
               </div>
             </div>
           ) : (
-            <div className="flex space-x-4 w-full">
+            <div className="w-full">
               {!isActive ? (
                 <button
                   onClick={handleStart}
-                  className={`flex-1 flex items-center justify-center space-x-2 px-6 py-4 text-white rounded-lg transition-colors font-medium ${
+                  className={`w-full flex items-center justify-center space-x-2 px-4 py-3 text-white rounded-xl transition-colors font-semibold ${
                     currentActivity.color === "blue" 
                       ? "bg-blue-600 hover:bg-blue-700" 
-                      : "bg-green-600 hover:bg-green-700"
-                  }`}
+                      : "bg-emerald-600 hover:bg-emerald-700"
+                  } shadow-lg`}
                 >
                   <Play className="w-5 h-5" />
                   <span>Start Quest</span>
                 </button>
               ) : (
-                <>
+                <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={handlePause}
-                    className="flex-1 flex items-center justify-center space-x-2 px-6 py-4 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors font-medium"
+                    className="flex items-center justify-center space-x-1 px-3 py-3 bg-amber-500 text-white rounded-xl hover:bg-amber-600 transition-colors font-semibold text-sm"
                   >
-                    <Pause className="w-5 h-5" />
+                    <Pause className="w-4 h-4" />
                     <span>{isPaused ? "Resume" : "Pause"}</span>
                   </button>
                   <button
                     onClick={handleStop}
-                    className="flex-1 flex items-center justify-center space-x-2 px-6 py-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+                    className="flex items-center justify-center space-x-1 px-3 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors font-semibold text-sm"
                   >
-                    <Square className="w-5 h-5" />
+                    <Square className="w-4 h-4" />
                     <span>Stop</span>
                   </button>
-                </>
+                </div>
               )}
             </div>
           )}
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">{distance}</div>
-            <div className="text-sm text-gray-600">Target Distance (km)</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">{minutes}</div>
-            <div className="text-sm text-gray-600">Target Time (min)</div>
+          
+          <div className="grid grid-cols-2 gap-3 mt-4">
+            <div className="text-center p-2 bg-gray-50 rounded-lg">
+              <div className="text-lg font-bold text-gray-900">{distance}</div>
+              <div className="text-xs text-gray-600">km target</div>
+            </div>
+            <div className="text-center p-2 bg-gray-50 rounded-lg">
+              <div className="text-lg font-bold text-gray-900">{minutes}</div>
+              <div className="text-xs text-gray-600">min target</div>
+            </div>
           </div>
         </div>
       </div>
