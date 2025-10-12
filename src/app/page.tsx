@@ -70,8 +70,6 @@ export default function CharacterSelection() {
 
         {!selectedCharacter && (
           <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-            Choose wisely! 
-            <br />
             Your character represents your journey in both fitness and the crypto world.
           </div>
         )}

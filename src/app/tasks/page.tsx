@@ -83,7 +83,7 @@ export default function DailyTasks() {
           </div>
           
           <div className="space-y-3">
-            <h1 className="text-2xl font-bold text-gray-900">Daily Tasks</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Daily Onchain Tasks</h1>
             {activity && (
               <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-100">
                 <p className="text-emerald-700 text-sm font-medium">
