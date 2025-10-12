@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import Lottie from "lottie-react";
 import degenCharacter from "../../public/Assets/Animation/degen-character.json";
 import runnerCharacter from "../../public/Assets/Animation/runner-character.json";
@@ -11,15 +12,28 @@ export default function CharacterSelection() {
   const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-8 pb-20">
+    <div className="min-h-screen bg-white flex items-center justify-center p-8 pb-25">
       <div className="max-w-md w-full space-y-8 text-center">
-        <div className="space-y-4">
-          <h1 className="text-3xl font-semibold text-gray-900">
-            Choose Your Character
-          </h1>
-          <p className="text-gray-600">
-            Select a character to start your fitness journey
-          </p>
+        <div className="space-y-6">
+          <div className="flex justify-center">
+            <Image
+              src="/Assets/Logo/logo-onchain-leveling.png"
+              alt="Onchain Leveling"
+              width={100}
+              height={80}
+              className="object-contain"
+              priority
+            />
+          </div>
+          
+          <div className="space-y-4">
+            <h1 className="text-3xl font-semibold text-gray-900">
+              Choose Your Character
+            </h1>
+            <p className="text-gray-600">
+              Select a character to start your fitness journey
+            </p>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-6">
@@ -54,12 +68,20 @@ export default function CharacterSelection() {
           </div>
         </div>
 
+        {!selectedCharacter && (
+          <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+            Choose wisely! 
+            <br />
+            Your character represents your journey in both fitness and the crypto world.
+          </div>
+        )}
+
         {selectedCharacter && (
           <Link
             href={`/activity?character=${selectedCharacter}`}
             className="inline-flex items-center justify-center w-full px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
           >
-            Continue
+            Continue with {selectedCharacter === "degen" ? "Degen" : "Runner"}
           </Link>
         )}
       </div>
