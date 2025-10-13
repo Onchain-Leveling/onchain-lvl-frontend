@@ -94,7 +94,7 @@ export default function QuestPage() {
   const currentActivity = activityData[activity as keyof typeof activityData] || activityData.run;
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4 pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 flex items-center justify-center p-4 pb-20">
       <div className="max-w-sm w-full space-y-6">
         <div className="text-center space-y-2">
           <h1 className="text-2xl font-bold text-gray-900">

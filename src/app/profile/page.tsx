@@ -15,8 +15,8 @@ export default function Profile() {
   
   // Mock user data - in real app this would come from user session/API
   const mockUserData = {
-    username: character === "degen" ? "CryptoDegen123" : "FitnessRunner",
-    name: character === "degen" ? "Alex Chen" : "Sarah Johnson",
+    username: character === "degen" ? "bimajdv7" : "bimajdv7",
+    name: character === "degen" ? "Bima Jadiva" : "bimajdv7",
     joinDate: "Oct 2024"
   };
   
@@ -51,7 +51,7 @@ export default function Profile() {
   const unlockedAchievements = achievements.filter(a => a.unlocked);
 
   return (
-    <div className="min-h-screen bg-white p-6 pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 p-6 pb-20">
       <div className="max-w-sm mx-auto space-y-6">
         <div className="text-center space-y-3">
           <div className="w-24 h-24 mx-auto">

@@ -16,7 +16,7 @@ export default function ActivitySelection() {
   const character = searchParams.get("character");
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4 pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center p-4 pb-20">
       <div className="max-w-sm w-full space-y-6 text-center">
         <div className="space-y-2">
           <h1 className="text-2xl font-bold text-gray-900">

@@ -73,7 +73,7 @@ export default function DailyTasks() {
   const totalXP = completedTasks * 100;
 
   return (
-    <div className="min-h-screen bg-white p-8 pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-yellow-50 p-8 pb-20">
       <div className="max-w-md mx-auto space-y-8">
         <div className="text-center space-y-8">
           <div className="flex justify-center">

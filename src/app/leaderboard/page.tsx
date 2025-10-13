@@ -130,7 +130,7 @@ export default function Leaderboard() {
   };
 
   return (
-    <div className="min-h-screen bg-white p-8 pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50 p-8 pb-20">
       <div className="max-w-md mx-auto space-y-6">
         <div className="text-center space-y-4">
           <div className="flex justify-center">
