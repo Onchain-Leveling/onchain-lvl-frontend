@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useCallback } from "react";
 
 interface ShareImageTemplateProps {
   activity: string;
@@ -24,11 +24,7 @@ export default function ShareImageTemplate({
   const characterEmoji = character === "degen" ? "🦍" : "🏃‍♂️";
   const characterName = character === "degen" ? "Degen" : "Runner";
 
-  useEffect(() => {
-    generateImage();
-  }, [activity, distance, minutes, character]);
-
-  const generateImage = async () => {
+  const generateImage = useCallback(async () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -108,7 +104,11 @@ export default function ShareImageTemplate({
         onImageReady(imageUrl);
       }
     }, "image/png");
-  };
+  }, [activity, distance, minutes, onImageReady, activityEmoji, activityName, characterEmoji, characterName]);
+
+  useEffect(() => {
+    generateImage();
+  }, [generateImage]);
 
   return (
     <canvas 

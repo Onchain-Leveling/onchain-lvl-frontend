@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Lottie from "lottie-react";
@@ -8,7 +8,7 @@ import hamsterRun from "../../../public/Assets/Animation/hamster-run.json";
 import boxWalking from "../../../public/Assets/Animation/box-walking.json";
 import BottomNavbar from "../../components/BottomNavbar";
 
-export default function ActivitySelection() {
+function ActivitySelectionContent() {
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
   const [minutes, setMinutes] = useState(30);
   const [distance, setDistance] = useState(5);
@@ -131,5 +131,20 @@ export default function ActivitySelection() {
       </div>
       <BottomNavbar />
     </div>
+  );
+}
+
+export default function ActivitySelection() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="text-gray-600">Loading activities...</p>
+        </div>
+      </div>
+    }>
+      <ActivitySelectionContent />
+    </Suspense>
   );
 }

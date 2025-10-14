@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Share2, Copy, X, Download, Image as ImageIcon } from "lucide-react";
+import Image from "next/image";
+import { Copy, X, Download, Image as ImageIcon } from "lucide-react";
 import ShareImageTemplate from "./ShareImageTemplate";
 
 interface ShareProgressProps {
@@ -153,9 +154,11 @@ Building healthy habits onchain! 💪
             {showImage && imageUrl && (
               <div className="space-y-3">
                 <div className="border border-gray-200 rounded-lg overflow-hidden">
-                  <img 
+                  <Image 
                     src={imageUrl} 
                     alt="Progress Share Image" 
+                    width={600}
+                    height={400}
                     className="w-full h-auto"
                   />
                 </div>

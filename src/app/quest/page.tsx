@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Lottie from "lottie-react";
 import hamsterRun from "../../../public/Assets/Animation/hamster-run.json";
@@ -9,7 +9,7 @@ import BottomNavbar from "../../components/BottomNavbar";
 import ShareProgress from "../../components/ShareProgress";
 import { Play, Pause, Square, Share2 } from "lucide-react";
 
-export default function QuestPage() {
+function QuestContent() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [isActive, setIsActive] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -225,5 +225,20 @@ export default function QuestPage() {
       
       <BottomNavbar />
     </div>
+  );
+}
+
+export default function QuestPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto"></div>
+          <p className="text-gray-600">Loading quest...</p>
+        </div>
+      </div>
+    }>
+      <QuestContent />
+    </Suspense>
   );
 }

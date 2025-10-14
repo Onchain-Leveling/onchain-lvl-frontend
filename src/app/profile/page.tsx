@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Lottie from "lottie-react";
@@ -8,7 +9,7 @@ import runnerCharacter from "../../../public/Assets/Animation/runner-character.j
 import { Trophy, Target, Zap } from "lucide-react";
 import BottomNavbar from "../../components/BottomNavbar";
 
-export default function Profile() {
+function ProfileContent() {
   const searchParams = useSearchParams();
   const character = searchParams.get("character") || "degen";
   const xp = Number(searchParams.get("xp")) || 0;
@@ -144,7 +145,7 @@ export default function Profile() {
           </div>
 
           <div className="p-4 bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl border border-slate-200">
-            <h2 className="text-base font-semibold text-gray-900 mb-3">Today's Stats</h2>
+            <h2 className="text-base font-semibold text-gray-900 mb-3">Today&apos;s Stats</h2>
             <div className="grid grid-cols-3 gap-3 text-center">
               <div className="p-2 bg-white rounded-lg border border-slate-200">
                 <div className="text-lg font-bold text-slate-700">0</div>
@@ -189,5 +190,20 @@ export default function Profile() {
       </div>
       <BottomNavbar />
     </div>
+  );
+}
+
+export default function Profile() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="text-gray-600">Loading profile...</p>
+        </div>
+      </div>
+    }>
+      <ProfileContent />
+    </Suspense>
   );
 }

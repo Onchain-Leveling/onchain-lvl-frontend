@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Lottie from "lottie-react";
@@ -17,7 +17,7 @@ interface Task {
   completed: boolean;
 }
 
-export default function DailyTasks() {
+function DailyTasksContent() {
   const [tasks, setTasks] = useState<Task[]>([
     { id: "running", title: "Running", current: 0, target: 1, unit: "km", completed: false },
     { id: "walking", title: "Walking", current: 0, target: 5, unit: "km", completed: false },
@@ -189,5 +189,20 @@ export default function DailyTasks() {
       </div>
       <BottomNavbar />
     </div>
+  );
+}
+
+export default function DailyTasks() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-yellow-50 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600 mx-auto"></div>
+          <p className="text-gray-600">Loading tasks...</p>
+        </div>
+      </div>
+    }>
+      <DailyTasksContent />
+    </Suspense>
   );
 }
