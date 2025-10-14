@@ -6,13 +6,12 @@ import Image from "next/image";
 import Lottie from "lottie-react";
 import degenCharacter from "../../../public/Assets/Animation/degen-character.json";
 import runnerCharacter from "../../../public/Assets/Animation/runner-character.json";
-import BottomNavbar from "../../components/BottomNavbar";
 
 export default function CharacterSelection() {
   const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 flex items-center justify-center p-8 pb-25">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full space-y-8 text-center">
         <div className="space-y-6">
           <div className="flex justify-center">
@@ -88,7 +87,6 @@ export default function CharacterSelection() {
           </button>
         )}
       </div>
-      <BottomNavbar />
     </div>
   );
 }
