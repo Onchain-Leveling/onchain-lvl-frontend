@@ -161,7 +161,7 @@ function DailyTasksContent() {
                   className={`${!task.completed ? "flex-1" : "w-full"} px-4 py-2 rounded-xl transition-all text-sm font-semibold ${
                     task.completed
                       ? "bg-gradient-to-r from-amber-400 to-orange-500 text-white hover:from-amber-500 hover:to-orange-600 shadow-md"
-                      : "bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 shadow-md"
+                      : "bg-black text-white hover:bg-gray-800 shadow-md"
                   }`}
                 >
                   {task.completed ? "Claim EXP" : "Complete"}

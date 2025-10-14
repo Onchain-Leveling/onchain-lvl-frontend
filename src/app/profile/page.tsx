@@ -1,190 +1,176 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { Trophy, Calendar, Activity } from "lucide-react";
 import Lottie from "lottie-react";
 import degenCharacter from "../../../public/Assets/Animation/degen-character.json";
 import runnerCharacter from "../../../public/Assets/Animation/runner-character.json";
-import { Trophy, Target, Zap } from "lucide-react";
 import BottomNavbar from "../../components/BottomNavbar";
 
 function ProfileContent() {
   const searchParams = useSearchParams();
   const character = searchParams.get("character") || "degen";
-  const xp = Number(searchParams.get("xp")) || 0;
+  const [selectedCharacter, setSelectedCharacter] = useState<string>("degen");
   
-  // Mock user data - in real app this would come from user session/API
-  const mockUserData = {
-    username: character === "degen" ? "bimajdv7" : "bimajdv7",
-    name: character === "degen" ? "Bima Jadiva" : "bimajdv7",
-    joinDate: "Oct 2024"
-  };
-  
-  const level = Math.floor(xp / 300) + 1;
-  const xpForNextLevel = (level * 300) - xp;
-  const xpProgress = ((xp % 300) / 300) * 100;
+  const [userData] = useState({
+    name: "Bima Jadiva",
+    username: "bimajdv7",
+    level: 5,
+    xp: 1250,
+    nextLevelXp: 1500,
+    joinDate: "October 2024",
+    totalActivities: 28,
+    streak: 7
+  });
 
-  const characterData = {
-    degen: {
-      name: "Degen",
-      description: "The crypto enthusiast",
-      animation: degenCharacter,
-      color: "blue"
-    },
-    runner: {
-      name: "Runner", 
-      description: "The fitness lover",
-      animation: runnerCharacter,
-      color: "green"
-    }
-  };
+  const [achievements] = useState([
+    { id: 1, title: "First Steps", description: "Complete your first activity", unlocked: true },
+    { id: 2, title: "Consistent", description: "7-day activity streak", unlocked: true },
+    { id: 3, title: "Level Master", description: "Reach level 5", unlocked: true },
+    { id: 4, title: "XP Hunter", description: "Earn 1000 XP", unlocked: true },
+    { id: 5, title: "Task Master", description: "Complete 100 tasks", unlocked: false },
+    { id: 6, title: "Champion", description: "Reach level 10", unlocked: false }
+  ]);
 
-  const currentCharacter = characterData[character as keyof typeof characterData] || characterData.degen;
+  const [weeklyStats] = useState([
+    { day: "Mon", completed: true },
+    { day: "Tue", completed: true },
+    { day: "Wed", completed: false },
+    { day: "Thu", completed: true },
+    { day: "Fri", completed: true },
+    { day: "Sat", completed: true },
+    { day: "Sun", completed: false }
+  ]);
 
-  const achievements = [
-    { id: 1, title: "First Steps", description: "Complete your first activity", unlocked: xp > 0 },
-    { id: 2, title: "Task Master", description: "Complete all Daily Onchain Tasks", unlocked: xp >= 300 },
-    { id: 3, title: "Dedicated", description: "Reach level 5", unlocked: level >= 5 },
-    { id: 4, title: "Champion", description: "Reach level 10", unlocked: level >= 10 },
-  ];
+  useEffect(() => {
+    const savedCharacter = localStorage.getItem('selectedCharacter') || character || 'degen';
+    setSelectedCharacter(savedCharacter);
+  }, [character]);
 
-  const unlockedAchievements = achievements.filter(a => a.unlocked);
+  const xpPercentage = (userData.xp / userData.nextLevelXp) * 100;
+  const unlockedAchievements = achievements.filter(a => a.unlocked).length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 p-6 pb-20">
-      <div className="max-w-sm mx-auto space-y-6">
-        <div className="text-center space-y-3">
-          <div className="w-24 h-24 mx-auto">
-            <Lottie animationData={currentCharacter.animation} loop={true} />
+    <div className="min-h-screen bg-white pb-20">
+      <div className="max-w-md mx-auto p-6">
+        <div className="text-center mb-8">
+          <div className="w-20 h-20 mx-auto mb-4">
+            <Lottie 
+              animationData={selectedCharacter === "degen" ? degenCharacter : runnerCharacter} 
+              loop={true} 
+            />
           </div>
-          
-          <div>
-            <h1 className="text-xl font-bold text-gray-900">
-              {mockUserData.name}
-            </h1>
-            <p className="text-sm text-gray-600">@{mockUserData.username}</p>
-            <div className="flex items-center justify-center space-x-2 mt-2">
-              <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
-                {currentCharacter.name} {currentCharacter.name === "Degen" ? "🦍" : "🏃‍♂️"}
-              </span>
-              <span className="text-xs text-gray-500">• {mockUserData.joinDate}</span>
-            </div>
+          <h1 className="text-2xl font-bold text-gray-900">{userData.name}</h1>
+          <p className="text-gray-500 text-sm">@{userData.username}</p>
+          <div className="flex items-center justify-center space-x-2 mt-2">
+            <span className="px-3 py-1 bg-black text-white rounded-full text-xs font-medium">
+              {selectedCharacter === "degen" ? "Degen" : "Runner"}
+            </span>
+            <span className="text-xs text-gray-400">• {userData.joinDate}</span>
           </div>
         </div>
 
-        <div className="space-y-4">
-          <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-100">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center space-x-2">
-                <Zap className="w-4 h-4 text-indigo-600" />
-                <h2 className="text-base font-semibold text-gray-900">Level {level}</h2>
-              </div>
-              <span className="text-xs font-medium px-2 py-1 bg-indigo-100 text-indigo-700 rounded-full">{xp} XP</span>
-            </div>
-            
-            <div className="mb-2">
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div
-                  className="h-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all"
-                  style={{ width: `${xpProgress}%` }}
-                ></div>
-              </div>
-            </div>
-            
-            <p className="text-xs text-gray-600">
-              {xpForNextLevel} XP to level {level + 1}
-            </p>
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium text-gray-600">Level {userData.level}</span>
+            <span className="text-sm text-gray-400">{userData.xp}/{userData.nextLevelXp} XP</span>
           </div>
+          <div className="w-full bg-gray-100 rounded-full h-2">
+            <div 
+              className="bg-black h-2 rounded-full transition-all duration-500"
+              style={{ width: `${xpPercentage}%` }}
+            ></div>
+          </div>
+          <p className="text-xs text-gray-400 mt-2 text-center">
+            {userData.nextLevelXp - userData.xp} XP to Level {userData.level + 1}
+          </p>
+        </div>
 
-          <div className="p-4 bg-amber-50 rounded-xl border border-amber-100">
-            <div className="flex items-center space-x-2 mb-3">
-              <Trophy className="w-4 h-4 text-amber-600" />
-              <h2 className="text-base font-semibold text-gray-900">Achievements</h2>
-            </div>
-            
-            <div className="space-y-2">
-              {achievements.slice(0, 3).map((achievement) => (
-                <div
-                  key={achievement.id}
-                  className={`p-2 rounded-lg border transition-all ${
-                    achievement.unlocked
-                      ? "border-amber-200 bg-amber-50"
-                      : "border-gray-200 bg-gray-50 opacity-60"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className={`text-sm font-medium ${
-                        achievement.unlocked ? "text-amber-800" : "text-gray-500"
-                      }`}>
-                        {achievement.title}
-                      </h3>
-                      <p className={`text-xs ${
-                        achievement.unlocked ? "text-amber-600" : "text-gray-400"
-                      }`}>
-                        {achievement.description}
-                      </p>
-                    </div>
-                    {achievement.unlocked && (
-                      <Trophy className="w-4 h-4 text-amber-600" />
-                    )}
-                  </div>
+        <div className="grid grid-cols-3 gap-4 mb-8">
+          <div className="text-center p-4 bg-gray-50 rounded-xl">
+            <div className="text-2xl font-bold text-gray-900 mb-1">{userData.level}</div>
+            <div className="text-xs text-gray-500">Level</div>
+          </div>
+          <div className="text-center p-4 bg-gray-50 rounded-xl">
+            <div className="text-2xl font-bold text-gray-900 mb-1">{userData.totalActivities}</div>
+            <div className="text-xs text-gray-500">Activities</div>
+          </div>
+          <div className="text-center p-4 bg-gray-50 rounded-xl">
+            <div className="text-2xl font-bold text-gray-900 mb-1">{userData.streak}</div>
+            <div className="text-xs text-gray-500">Day Streak</div>
+          </div>
+        </div>
+
+        <div className="mb-8">
+          <div className="flex items-center space-x-2 mb-4">
+            <Calendar className="w-5 h-5 text-gray-600" />
+            <h2 className="text-lg font-semibold text-gray-900">This Week</h2>
+          </div>
+          <div className="flex justify-between space-x-2">
+            {weeklyStats.map((day, index) => (
+              <div key={index} className="flex flex-col items-center space-y-2">
+                <div className="text-xs text-gray-500 font-medium">{day.day}</div>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                  day.completed ? 'bg-black' : 'bg-gray-200'
+                }`}>
+                  {day.completed && <Activity className="w-4 h-4 text-white" />}
                 </div>
-              ))}
-            </div>
-            
-            <div className="mt-3 p-2 bg-white rounded-lg border border-amber-200">
-              <div className="flex items-center space-x-2">
-                <Target className="w-3 h-3 text-amber-600" />
-                <span className="text-xs font-medium text-gray-900">
-                  {unlockedAchievements.length}/{achievements.length} Unlocked
-                </span>
               </div>
-            </div>
+            ))}
           </div>
+        </div>
 
-          <div className="p-4 bg-gradient-to-r from-slate-50 to-gray-50 rounded-xl border border-slate-200">
-            <h2 className="text-base font-semibold text-gray-900 mb-3">Today&apos;s Stats</h2>
-            <div className="grid grid-cols-3 gap-3 text-center">
-              <div className="p-2 bg-white rounded-lg border border-slate-200">
-                <div className="text-lg font-bold text-slate-700">0</div>
-                <div className="text-xs text-gray-600">Activities</div>
-              </div>
-              <div className="p-2 bg-white rounded-lg border border-slate-200">
-                <div className="text-lg font-bold text-slate-700">{xp}</div>
-                <div className="text-xs text-gray-600">XP Earned</div>
-              </div>
-              <div className="p-2 bg-white rounded-lg border border-slate-200">
-                <div className="text-lg font-bold text-slate-700">{level}</div>
-                <div className="text-xs text-gray-600">Level</div>
-              </div>
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-2">
+              <Trophy className="w-5 h-5 text-gray-600" />
+              <h2 className="text-lg font-semibold text-gray-900">Achievements</h2>
             </div>
+            <span className="text-sm text-gray-500">{unlockedAchievements}/{achievements.length}</span>
+          </div>
+          
+          <div className="space-y-3">
+            {achievements.slice(0, 4).map((achievement) => (
+              <div key={achievement.id} className="flex items-center space-x-3">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                  achievement.unlocked ? 'bg-black' : 'bg-gray-200'
+                }`}>
+                  <Trophy className={`w-4 h-4 ${achievement.unlocked ? 'text-white' : 'text-gray-400'}`} />
+                </div>
+                <div className="flex-1">
+                  <h3 className={`text-sm font-medium ${
+                    achievement.unlocked ? 'text-gray-900' : 'text-gray-400'
+                  }`}>
+                    {achievement.title}
+                  </h3>
+                  <p className={`text-xs ${
+                    achievement.unlocked ? 'text-gray-600' : 'text-gray-400'
+                  }`}>
+                    {achievement.description}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
         <div className="space-y-3">
           <Link
-            href={`/activity?character=${character}`}
-            className="inline-flex items-center justify-center w-full px-4 py-3 bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-colors font-semibold text-sm shadow-md"
+            href="/leaderboard"
+            className="w-full bg-black text-white py-3 rounded-xl font-medium hover:bg-gray-800 transition-colors flex items-center justify-center space-x-2"
           >
-            Start New Activity
+            <Trophy className="w-4 h-4" />
+            <span>View Leaderboard</span>
           </Link>
-          
           <div className="grid grid-cols-2 gap-3">
-            <Link
-              href={`/tasks?character=${character}`}
-              className="inline-flex items-center justify-center px-3 py-2 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium text-sm"
-            >
-              Daily Tasks
-            </Link>
-            
-            <Link
-              href="/leaderboard"
-              className="inline-flex items-center justify-center px-3 py-2 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl hover:from-amber-600 hover:to-orange-700 transition-all font-medium text-sm shadow-md"
-            >
-              🏆 Leaderboard
-            </Link>
+            <button className="py-2 px-4 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors text-sm font-medium">
+              Edit Profile
+            </button>
+            <button className="py-2 px-4 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors text-sm font-medium">
+              Settings
+            </button>
           </div>
         </div>
       </div>
@@ -196,9 +182,9 @@ function ProfileContent() {
 export default function Profile() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black mx-auto"></div>
           <p className="text-gray-600">Loading profile...</p>
         </div>
       </div>
