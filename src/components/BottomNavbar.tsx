@@ -67,8 +67,8 @@ function BottomNavbarContent() {
               >
                 <div className={`w-17 h-17 rounded-full flex items-center justify-center ${
                   item.active
-                    ? "bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg"
-                    : "bg-gradient-to-r from-blue-500 to-purple-500 shadow-md"
+                    ? "bg-black shadow-lg"
+                    : "bg-gray-800 shadow-md"
                 }`}>
                   <Icon className="w-6 h-6" />
                 </div>

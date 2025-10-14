@@ -1,186 +1,182 @@
 "use client";
 
-import { useState } from "react";
-import { Sparkles, Send, Activity, Target, TrendingUp, Heart } from "lucide-react";
+import { useState, useEffect } from "react";
+import { CheckCircle, AlertCircle, TrendingUp } from "lucide-react";
+import Lottie from "lottie-react";
+import degenCharacter from "../../../public/Assets/Animation/degen-character.json";
+import runnerCharacter from "../../../public/Assets/Animation/runner-character.json";
+import aiAnalyzerAnimation from "../../../public/Assets/Animation/ai-analyzer.json";
 import BottomNavbar from "../../components/BottomNavbar";
 
-interface Message {
-  id: string;
-  text: string;
-  isUser: boolean;
-  timestamp: Date;
+interface TaskProgress {
+  name: string;
+  completed: number;
+  target: number;
+  unit: string;
+  xpEarned: number;
+  status: 'completed' | 'in-progress' | 'pending';
 }
 
-interface HealthInsight {
-  icon: React.ReactNode;
+interface AIAnalysis {
+  type: 'success' | 'warning' | 'info';
   title: string;
-  description: string;
-  color: string;
+  message: string;
 }
 
 export default function AIAnalyzer() {
-  const [messages, setMessages] = useState<Message[]>([
+  const [selectedCharacter, setSelectedCharacter] = useState<string>("degen");
+  
+  const [levelData] = useState({
+    level: 5,
+    xp: 1250,
+    nextLevelXp: 1500,
+    completionRate: 78
+  });
+
+  const [todayTasks] = useState<TaskProgress[]>([
+    { name: "Running", completed: 0.8, target: 1, unit: "km", xpEarned: 40, status: 'in-progress' as const },
+    { name: "Walking", completed: 5, target: 5, unit: "km", xpEarned: 100, status: 'completed' as const },
+    { name: "Sit-ups", completed: 7, target: 10, unit: "reps", xpEarned: 21, status: 'in-progress' as const }
+  ]);
+
+  const [aiAnalyses] = useState<AIAnalysis[]>([
     {
-      id: "1",
-      text: "Hello! I'm your AI Health Assistant. I can help you analyze your onchain leveling progress, provide health insights, and suggest improvements to reach your fitness goals. How can I help you today?",
-      isUser: false,
-      timestamp: new Date()
+      type: 'success',
+      title: 'Great Progress Today!',
+      message: 'You\'re on track to reach Level 6. Complete your running goal to earn bonus XP.'
+    },
+    {
+      type: 'info',
+      title: 'Consistency Streak',
+      message: 'You\'ve maintained an 78% completion rate. Keep this momentum for optimal results.'
+    },
+    {
+      type: 'warning',
+      title: 'Quick Win Available',
+      message: 'Only 0.2km left to complete your running goal. A 2-minute effort will earn +10 XP.'
     }
   ]);
-  const [inputText, setInputText] = useState("");
 
-  const healthInsights: HealthInsight[] = [
-    {
-      icon: <Activity className="w-5 h-5" />,
-      title: "Activity Analysis",
-      description: "Track your daily movement patterns and optimize your workout routine",
-      color: "bg-blue-50 text-blue-600"
-    },
-    {
-      icon: <Target className="w-5 h-5" />,
-      title: "Goal Setting",
-      description: "Set realistic fitness goals based on your current progress",
-      color: "bg-green-50 text-green-600"
-    },
-    {
-      icon: <TrendingUp className="w-5 h-5" />,
-      title: "Progress Tracking",
-      description: "Monitor your onchain leveling and XP growth over time",
-      color: "bg-purple-50 text-purple-600"
-    },
-    {
-      icon: <Heart className="w-5 h-5" />,
-      title: "Health Tips",
-      description: "Personalized recommendations for your wellness journey",
-      color: "bg-red-50 text-red-600"
-    }
-  ];
+  useEffect(() => {
+    const character = localStorage.getItem('selectedCharacter') || 'degen';
+    setSelectedCharacter(character);
+  }, []);
 
-  const suggestedQuestions = [
-    "How can I improve my daily activity?",
-    "What's my progress this week?",
-    "Tips for weight loss?",
-    "Analyze my onchain level"
-  ];
-
-  const handleSendMessage = () => {
-    if (!inputText.trim()) return;
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      text: inputText,
-      isUser: true,
-      timestamp: new Date()
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-
-    setTimeout(() => {
-      const aiResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        text: getAIResponse(inputText),
-        isUser: false,
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, aiResponse]);
-    }, 1000);
-
-    setInputText("");
-  };
-
-  const getAIResponse = (question: string): string => {
-    const responses = {
-      "activity": "Based on your current progress, I recommend increasing your daily walking target by 0.5km and adding 2 more sit-ups to your routine. This will help you earn more XP while building sustainable habits.",
-      "progress": "Great progress this week! You've completed 4/7 daily tasks and earned 280 XP. You're 220 XP away from Level 6. Keep up the consistency!",
-      "weight": "For healthy weight loss, focus on consistent daily activities. Your current walking routine is excellent - try to maintain it and gradually increase intensity. Remember, sustainable progress is key!",
-      "level": "Your onchain level reflects consistent engagement! At Level 5 with 1250 XP, you're showing great dedication. Focus on completing daily tasks to reach Level 6 faster."
-    };
-
-    const lowerQuestion = question.toLowerCase();
-    if (lowerQuestion.includes("activity") || lowerQuestion.includes("improve")) return responses.activity;
-    if (lowerQuestion.includes("progress") || lowerQuestion.includes("week")) return responses.progress;
-    if (lowerQuestion.includes("weight") || lowerQuestion.includes("loss") || lowerQuestion.includes("tips")) return responses.weight;
-    if (lowerQuestion.includes("level") || lowerQuestion.includes("analyze") || lowerQuestion.includes("onchain")) return responses.level;
-    
-    return "I'm here to help with your health and fitness journey! Ask me about your activity progress, goal setting, or health tips.";
-  };
+  const xpPercentage = (levelData.xp / levelData.nextLevelXp) * 100;
+  const completedTasks = todayTasks.filter(task => task.status === 'completed').length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 pb-20">
+    <div className="min-h-screen bg-white pb-20">
       <div className="max-w-md mx-auto">
-        <div className="bg-white border-b border-gray-100 p-6">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
-            </div>
+        <div className="p-6 pb-4">
+          <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-xl font-semibold text-gray-900">AI Health Analyzer</h1>
-              <p className="text-sm text-gray-600">Your personal fitness assistant</p>
+              <h1 className="text-2xl font-bold text-gray-900">AI Analyzer</h1>
+              <p className="text-gray-500 text-sm mt-1">Level {levelData.level} • {levelData.completionRate}% complete</p>
+            </div>
+            <div className="w-16 h-16">
+              <Lottie animationData={aiAnalyzerAnimation} loop={true} />
             </div>
           </div>
-        </div>
 
-        <div className="p-6 space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            {healthInsights.map((insight, index) => (
-              <div key={index} className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
-                <div className={`inline-flex items-center justify-center w-8 h-8 rounded-lg ${insight.color} mb-3`}>
-                  {insight.icon}
-                </div>
-                <h3 className="font-medium text-gray-900 text-sm mb-1">{insight.title}</h3>
-                <p className="text-xs text-gray-600">{insight.description}</p>
-              </div>
-            ))}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-gray-600">{levelData.xp} XP</span>
+              <span className="text-sm text-gray-400">{levelData.nextLevelXp} XP</span>
+            </div>
+            <div className="w-full bg-gray-100 rounded-full h-2">
+              <div 
+                className="bg-black h-2 rounded-full transition-all duration-500"
+                style={{ width: `${xpPercentage}%` }}
+              ></div>
+            </div>
+            <p className="text-xs text-gray-400 mt-2 text-center">
+              {levelData.nextLevelXp - levelData.xp} XP to Level {levelData.level + 1}
+            </p>
           </div>
 
-          <div className="bg-white rounded-lg border border-gray-100 shadow-sm">
-            <div className="p-4 border-b border-gray-100">
-              <h2 className="font-medium text-gray-900">Chat with AI Assistant</h2>
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">Today's Tasks</h2>
+              <span className="text-sm text-gray-500">{completedTasks}/{todayTasks.length}</span>
             </div>
             
-            <div className="h-64 overflow-y-auto p-4 space-y-4">
-              {messages.map((message) => (
-                <div key={message.id} className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-xs px-4 py-2 rounded-lg ${
-                    message.isUser 
-                      ? 'bg-blue-500 text-white' 
-                      : 'bg-gray-100 text-gray-900'
-                  }`}>
-                    <p className="text-sm">{message.text}</p>
+            <div className="space-y-4">
+              {todayTasks.map((task, index) => {
+                const progressPercentage = (task.completed / task.target) * 100;
+                const isCompleted = task.status === 'completed';
+                
+                return (
+                  <div key={index} className="group">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center space-x-3">
+                        {isCompleted ? (
+                          <CheckCircle className="w-5 h-5 text-green-500" />
+                        ) : (
+                          <AlertCircle className="w-5 h-5 text-gray-300" />
+                        )}
+                        <span className={`font-medium ${isCompleted ? 'text-green-600' : 'text-gray-700'}`}>
+                          {task.name}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-sm text-gray-600">
+                          {task.completed}/{task.target} {task.unit}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="w-full bg-gray-100 rounded-full h-1.5">
+                      <div 
+                        className={`h-1.5 rounded-full transition-all duration-300 ${
+                          isCompleted ? 'bg-green-500' : 'bg-gray-400'
+                        }`}
+                        style={{ width: `${Math.min(progressPercentage, 100)}%` }}
+                      ></div>
+                    </div>
                   </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="mb-8">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">AI Insights</h2>
+            <div className="space-y-3">
+              {aiAnalyses.map((analysis, index) => (
+                <div key={index} className="border-l-4 border-gray-200 pl-4 py-2">
+                  <h3 className="font-medium text-gray-900 text-sm mb-1">{analysis.title}</h3>
+                  <p className="text-gray-600 text-xs leading-relaxed">{analysis.message}</p>
                 </div>
               ))}
             </div>
-
-            <div className="p-4 border-t border-gray-100">
-              <div className="flex space-x-2 mb-3">
-                {suggestedQuestions.map((question, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setInputText(question)}
-                    className="text-xs px-3 py-1 bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors"
-                  >
-                    {question}
-                  </button>
-                ))}
-              </div>
-              
-              <div className="flex space-x-2">
-                <input
-                  type="text"
-                  value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                  placeholder="Ask about your health and progress..."
-                  className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            
+            <div className="mt-6 flex items-center space-x-3 p-4 bg-gray-50 rounded-xl">
+              <div className="w-10 h-10">
+                <Lottie 
+                  animationData={selectedCharacter === "degen" ? degenCharacter : runnerCharacter} 
+                  loop={true} 
                 />
-                <button
-                  onClick={handleSendMessage}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                >
-                  <Send className="w-4 h-4" />
-                </button>
               </div>
+              <div className="flex-1">
+                <p className="text-gray-700 text-sm">
+                  <span className="font-medium">AI Recommendation:</span> Focus on completing your running goal for maximum XP efficiency.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div className="text-center p-4 bg-gray-50 rounded-xl">
+              <div className="text-2xl font-bold text-gray-900 mb-1">{levelData.level}</div>
+              <div className="text-xs text-gray-500">Level</div>
+            </div>
+            <div className="text-center p-4 bg-gray-50 rounded-xl">
+              <div className="text-2xl font-bold text-gray-900 mb-1">{completedTasks}</div>
+              <div className="text-xs text-gray-500">Completed</div>
+            </div>
+            <div className="text-center p-4 bg-gray-50 rounded-xl">
+              <div className="text-2xl font-bold text-gray-900 mb-1">{levelData.completionRate}%</div>
+              <div className="text-xs text-gray-500">Success</div>
             </div>
           </div>
         </div>
