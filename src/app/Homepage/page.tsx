@@ -40,7 +40,7 @@ export default function Homepage() {
   ]);
 
   const [friendsActivities] = useState<FriendActivity[]>([
-    { name: "Alex", activity: "Completed 5km walk", xp: 100, time: "2 min ago", level: 6, character: 'runner' },
+    { name: "Dolin", activity: "Completed 5km walk", xp: 100, time: "2 min ago", level: 6, character: 'runner' },
     { name: "Sarah", activity: "Finished 15 sit-ups", xp: 45, time: "5 min ago", level: 4, character: 'degen' },
     { name: "Mike", activity: "Ran 3km distance", xp: 150, time: "12 min ago", level: 7, character: 'runner' },
     { name: "Emma", activity: "Daily walking goal", xp: 80, time: "18 min ago", level: 5, character: 'degen' },
@@ -61,6 +61,7 @@ export default function Homepage() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Welcome back</h1>
+            <p>Bima Jadiva!</p>
             <p className="text-gray-500 text-sm mt-1">Level {levelData.level} • {levelData.xp} XP</p>
           </div>
           <div className="w-16 h-16">
@@ -146,7 +147,7 @@ export default function Homepage() {
                 <div className="flex-1">
                   <div className="flex items-center space-x-2">
                     <span className="font-medium text-gray-900 text-sm">{friend.name}</span>
-                    <span className="text-xs bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded">L{friend.level}</span>
+                    <span className="text-xs bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded">Lvl.{friend.level}</span>
                   </div>
                   <p className="text-xs text-gray-600 mt-0.5">{friend.activity}</p>
                 </div>
