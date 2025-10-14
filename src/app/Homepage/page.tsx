@@ -1,46 +1,50 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
+import { CheckCircle, Clock, Users } from "lucide-react";
 import Lottie from "lottie-react";
 import degenCharacter from "../../../public/Assets/Animation/degen-character.json";
 import runnerCharacter from "../../../public/Assets/Animation/runner-character.json";
 import BottomNavbar from "../../components/BottomNavbar";
 
-interface ActivityData {
-  type: string;
+interface TaskData {
+  name: string;
   progress: number;
   target: number;
   unit: string;
   completed: boolean;
 }
 
-interface LevelData {
-  level: number;
+interface FriendActivity {
+  name: string;
+  activity: string;
   xp: number;
-  nextLevelXp: number;
-  character: string;
+  time: string;
+  level: number;
+  character: 'degen' | 'runner';
 }
 
 export default function Homepage() {
   const [selectedCharacter, setSelectedCharacter] = useState<string>("degen");
-  const [levelData] = useState<LevelData>({
+  
+  const [levelData] = useState({
     level: 5,
     xp: 1250,
     nextLevelXp: 1500,
-    character: "degen"
   });
 
-  const [dailyTasks] = useState<ActivityData[]>([
-    { type: "Running", progress: 0.3, target: 1, unit: "km", completed: false },
-    { type: "Walking", progress: 2.5, target: 5, unit: "km", completed: false },
-    { type: "Sit-ups", progress: 7, target: 10, unit: "reps", completed: false }
+  const [dailyTasks] = useState<TaskData[]>([
+    { name: "Running", progress: 0.8, target: 1, unit: "km", completed: false },
+    { name: "Walking", progress: 5, target: 5, unit: "km", completed: true },
+    { name: "Sit-ups", progress: 7, target: 10, unit: "reps", completed: false }
   ]);
 
-  const [recentActivities] = useState([
-    { date: "Today", activity: "Completed 0.8km run", xp: "+50 XP" },
-    { date: "Yesterday", activity: "Walked 5km", xp: "+100 XP" },
-    { date: "2 days ago", activity: "10 sit-ups completed", xp: "+30 XP" }
+  const [friendsActivities] = useState<FriendActivity[]>([
+    { name: "Alex", activity: "Completed 5km walk", xp: 100, time: "2 min ago", level: 6, character: 'runner' },
+    { name: "Sarah", activity: "Finished 15 sit-ups", xp: 45, time: "5 min ago", level: 4, character: 'degen' },
+    { name: "Mike", activity: "Ran 3km distance", xp: 150, time: "12 min ago", level: 7, character: 'runner' },
+    { name: "Emma", activity: "Daily walking goal", xp: 80, time: "18 min ago", level: 5, character: 'degen' },
+    { name: "David", activity: "Completed 20 sit-ups", xp: 60, time: "25 min ago", level: 3, character: 'runner' }
   ]);
 
   useEffect(() => {
@@ -52,23 +56,14 @@ export default function Homepage() {
   const completedTasks = dailyTasks.filter(task => task.completed).length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 pb-20">
-      <div className="max-w-md mx-auto p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <Image
-              src="/Assets/Logo/logo-onchain-leveling.png"
-              alt="Onchain Leveling"
-              width={40}
-              height={32}
-              className="object-contain"
-            />
-            <div>
-              <h1 className="text-xl font-semibold text-gray-900">Welcome back!</h1>
-              <p className="text-sm text-gray-600">Level {levelData.level} " {levelData.xp} XP</p>
-            </div>
+    <div className="min-h-screen bg-white pb-20">
+      <div className="max-w-md mx-auto p-6">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Welcome back</h1>
+            <p className="text-gray-500 text-sm mt-1">Level {levelData.level} • {levelData.xp} XP</p>
           </div>
-          <div className="w-12 h-12">
+          <div className="w-16 h-16">
             <Lottie 
               animationData={selectedCharacter === "degen" ? degenCharacter : runnerCharacter} 
               loop={true} 
@@ -76,56 +71,54 @@ export default function Homepage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <div className="mb-8">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-medium text-gray-900">Onchain Level Progress</h2>
-            <span className="text-sm font-medium text-blue-600">Level {levelData.level}</span>
+            <span className="text-sm font-medium text-gray-600">{levelData.xp} XP</span>
+            <span className="text-sm text-gray-400">{levelData.nextLevelXp} XP</span>
           </div>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm text-gray-600">
-              <span>{levelData.xp} XP</span>
-              <span>{levelData.nextLevelXp} XP</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-3">
-              <div 
-                className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-300"
-                style={{ width: `${xpPercentage}%` }}
-              ></div>
-            </div>
-            <p className="text-xs text-gray-500 text-center">
-              {levelData.nextLevelXp - levelData.xp} XP to next level
-            </p>
+          <div className="w-full bg-gray-100 rounded-full h-2">
+            <div 
+              className="bg-black h-2 rounded-full transition-all duration-500"
+              style={{ width: `${xpPercentage}%` }}
+            ></div>
           </div>
+          <p className="text-xs text-gray-400 mt-2 text-center">
+            {levelData.nextLevelXp - levelData.xp} XP to Level {levelData.level + 1}
+          </p>
         </div>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-medium text-gray-900">Daily Tasks</h2>
-            <span className="text-sm font-medium text-green-600">
-              {completedTasks}/{dailyTasks.length} completed
-            </span>
+            <h2 className="text-lg font-semibold text-gray-900">Today's Tasks</h2>
+            <span className="text-sm text-gray-500">{completedTasks}/{dailyTasks.length}</span>
           </div>
-          <div className="space-y-3">
+          
+          <div className="space-y-4">
             {dailyTasks.map((task, index) => {
               const progressPercentage = (task.progress / task.target) * 100;
               const isCompleted = task.progress >= task.target;
               
               return (
-                <div key={index} className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className={`text-sm font-medium ${isCompleted ? 'text-green-700' : 'text-gray-700'}`}>
-                      {task.type}
-                    </span>
-                    <span className={`text-xs ${isCompleted ? 'text-green-600' : 'text-gray-500'}`}>
+                <div key={index}>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center space-x-3">
+                      {isCompleted ? (
+                        <CheckCircle className="w-5 h-5 text-green-500" />
+                      ) : (
+                        <Clock className="w-5 h-5 text-gray-300" />
+                      )}
+                      <span className={`font-medium ${isCompleted ? 'text-green-600' : 'text-gray-700'}`}>
+                        {task.name}
+                      </span>
+                    </div>
+                    <span className="text-sm text-gray-600">
                       {task.progress}/{task.target} {task.unit}
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-gray-100 rounded-full h-1.5">
                     <div 
-                      className={`h-2 rounded-full transition-all duration-300 ${
-                        isCompleted 
-                          ? 'bg-gradient-to-r from-green-500 to-green-600' 
-                          : 'bg-gradient-to-r from-orange-400 to-orange-500'
+                      className={`h-1.5 rounded-full transition-all duration-300 ${
+                        isCompleted ? 'bg-green-500' : 'bg-gray-400'
                       }`}
                       style={{ width: `${Math.min(progressPercentage, 100)}%` }}
                     ></div>
@@ -136,31 +129,51 @@ export default function Homepage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Recent Activity</h2>
+        <div className="mb-8">
+          <div className="flex items-center space-x-2 mb-4">
+            <Users className="w-5 h-5 text-gray-600" />
+            <h2 className="text-lg font-semibold text-gray-900">Community Feed</h2>
+          </div>
           <div className="space-y-3">
-            {recentActivities.map((activity, index) => (
-              <div key={index} className="flex items-center justify-between py-2">
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">{activity.activity}</p>
-                  <p className="text-xs text-gray-500">{activity.date}</p>
+            {friendsActivities.map((friend, index) => (
+              <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                <div className="w-8 h-8">
+                  <Lottie 
+                    animationData={friend.character === "degen" ? degenCharacter : runnerCharacter} 
+                    loop={true} 
+                  />
                 </div>
-                <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">
-                  {activity.xp}
-                </span>
+                <div className="flex-1">
+                  <div className="flex items-center space-x-2">
+                    <span className="font-medium text-gray-900 text-sm">{friend.name}</span>
+                    <span className="text-xs bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded">L{friend.level}</span>
+                  </div>
+                  <p className="text-xs text-gray-600 mt-0.5">{friend.activity}</p>
+                </div>
+                <div className="text-right">
+                  <div className="text-xs font-medium text-green-600">+{friend.xp} XP</div>
+                  <div className="text-xs text-gray-400">{friend.time}</div>
+                </div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-4 text-white">
-            <div className="text-2xl font-bold">{levelData.level}</div>
-            <div className="text-sm opacity-90">Current Level</div>
-          </div>
-          <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-4 text-white">
-            <div className="text-2xl font-bold">{completedTasks}</div>
-            <div className="text-sm opacity-90">Tasks Done Today</div>
+        <div className="space-y-2">
+          <h2 className="text-lg font-semibold text-gray-900">Recent Activity</h2>
+          <div className="space-y-3">
+            <div className="border-l-4 border-green-500 pl-3 py-1">
+              <p className="text-sm font-medium text-gray-900">Walked 5km</p>
+              <p className="text-xs text-gray-500">Today • +100 XP</p>
+            </div>
+            <div className="border-l-4 border-blue-500 pl-3 py-1">
+              <p className="text-sm font-medium text-gray-900">Completed 0.8km run</p>
+              <p className="text-xs text-gray-500">Today • +40 XP</p>
+            </div>
+            <div className="border-l-4 border-gray-300 pl-3 py-1">
+              <p className="text-sm font-medium text-gray-900">7 sit-ups completed</p>
+              <p className="text-xs text-gray-500">Today • +21 XP</p>
+            </div>
           </div>
         </div>
       </div>
