@@ -23,6 +23,9 @@ function QuestContent() {
   const activity = searchParams.get("activity") || "run";
   const minutes = Number(searchParams.get("minutes")) || 30;
   const distance = Number(searchParams.get("distance")) || 5;
+  const weight = Number(searchParams.get("weight")) || 70;
+  const calories = Number(searchParams.get("calories")) || 0;
+  const steps = Number(searchParams.get("steps")) || 0;
 
   useEffect(() => {
     setTimeLeft(minutes * 60); // Convert minutes to seconds
@@ -94,7 +97,7 @@ function QuestContent() {
   const currentActivity = activityData[activity as keyof typeof activityData] || activityData.run;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 flex items-center justify-center p-4 pb-20">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4 pb-20">
       <div className="max-w-sm w-full space-y-6">
         <div className="text-center space-y-2">
           <h1 className="text-2xl font-bold text-gray-900">
@@ -116,20 +119,16 @@ function QuestContent() {
 
           <div className={`text-center p-6 rounded-2xl border-4 ${
             isCompleted 
-              ? "border-emerald-400 bg-emerald-50" 
+              ? "border-black bg-gray-50" 
               : isActive 
-                ? currentActivity.color === "blue" 
-                  ? "border-blue-400 bg-blue-50" 
-                  : "border-emerald-400 bg-emerald-50"
+                ? "border-black bg-gray-50"
                 : "border-gray-300 bg-gray-50"
           }`}>
             <div className={`text-4xl font-mono font-bold ${
               isCompleted 
-                ? "text-emerald-600" 
+                ? "text-black" 
                 : isActive 
-                  ? currentActivity.color === "blue" 
-                    ? "text-blue-600" 
-                    : "text-emerald-600"
+                  ? "text-black"
                   : "text-gray-600"
             }`}>
               {formatTime(timeLeft)}
@@ -141,25 +140,40 @@ function QuestContent() {
 
           {isCompleted ? (
             <div className="space-y-3 w-full">
-              <div className="p-3 bg-emerald-50 rounded-xl text-center border border-emerald-200">
-                <h3 className="text-sm font-semibold text-emerald-800 mb-1">
+              <div className="p-4 bg-gray-50 rounded-xl border border-gray-300 space-y-3">
+                <h3 className="text-lg font-semibold text-gray-900 text-center">
                   🎉 Quest Completed!
                 </h3>
-                <p className="text-xs text-emerald-600">
-                  {distance}km {activity}ing session done!
-                </p>
+                <div className="grid grid-cols-2 gap-3 text-center">
+                  <div className="bg-white p-3 rounded-lg">
+                    <div className="text-lg font-bold text-gray-900">{distance}km</div>
+                    <div className="text-xs text-gray-500">Target Distance</div>
+                  </div>
+                  <div className="bg-white p-3 rounded-lg">
+                    <div className="text-lg font-bold text-gray-900">{minutes}min</div>
+                    <div className="text-xs text-gray-500">Duration</div>
+                  </div>
+                  <div className="bg-white p-3 rounded-lg">
+                    <div className="text-lg font-bold text-gray-900">{calories}</div>
+                    <div className="text-xs text-gray-500">Calories</div>
+                  </div>
+                  <div className="bg-white p-3 rounded-lg">
+                    <div className="text-lg font-bold text-gray-900">{steps.toLocaleString()}</div>
+                    <div className="text-xs text-gray-500">Steps</div>
+                  </div>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => setShowShareModal(true)}
-                  className="flex items-center justify-center space-x-1 px-3 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors font-medium text-sm"
+                  className="flex items-center justify-center space-x-1 px-3 py-2 bg-gray-900 text-white rounded-xl hover:bg-black transition-colors font-medium text-sm"
                 >
                   <Share2 className="w-4 h-4" />
                   <span>Share</span>
                 </button>
                 <button
                   onClick={handleComplete}
-                  className="flex items-center justify-center px-3 py-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-colors font-medium text-sm"
+                  className="flex items-center justify-center px-3 py-2 bg-black text-white rounded-xl hover:bg-gray-800 transition-colors font-medium text-sm"
                 >
                   Earn XP
                 </button>
@@ -170,11 +184,7 @@ function QuestContent() {
               {!isActive ? (
                 <button
                   onClick={handleStart}
-                  className={`w-full flex items-center justify-center space-x-2 px-4 py-3 text-white rounded-xl transition-colors font-semibold ${
-                    currentActivity.color === "blue" 
-                      ? "bg-blue-600 hover:bg-blue-700" 
-                      : "bg-emerald-600 hover:bg-emerald-700"
-                  } shadow-lg`}
+                  className="w-full flex items-center justify-center space-x-2 px-4 py-3 text-white rounded-xl transition-colors font-semibold bg-black hover:bg-gray-800 shadow-lg"
                 >
                   <Play className="w-5 h-5" />
                   <span>Start Quest</span>
@@ -183,14 +193,14 @@ function QuestContent() {
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={handlePause}
-                    className="flex items-center justify-center space-x-1 px-3 py-3 bg-amber-500 text-white rounded-xl hover:bg-amber-600 transition-colors font-semibold text-sm"
+                    className="flex items-center justify-center space-x-1 px-3 py-3 bg-gray-600 text-white rounded-xl hover:bg-gray-700 transition-colors font-semibold text-sm"
                   >
                     <Pause className="w-4 h-4" />
                     <span>{isPaused ? "Resume" : "Pause"}</span>
                   </button>
                   <button
                     onClick={handleStop}
-                    className="flex items-center justify-center space-x-1 px-3 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors font-semibold text-sm"
+                    className="flex items-center justify-center space-x-1 px-3 py-3 bg-gray-800 text-white rounded-xl hover:bg-black transition-colors font-semibold text-sm"
                   >
                     <Square className="w-4 h-4" />
                     <span>Stop</span>
@@ -219,6 +229,8 @@ function QuestContent() {
           distance={distance}
           minutes={minutes}
           character={character}
+          calories={calories}
+          steps={steps}
           onClose={() => setShowShareModal(false)}
         />
       )}

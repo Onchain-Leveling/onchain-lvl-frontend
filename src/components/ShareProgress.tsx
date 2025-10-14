@@ -10,10 +10,12 @@ interface ShareProgressProps {
   distance: number;
   minutes: number;
   character: string;
+  calories?: number;
+  steps?: number;
   onClose: () => void;
 }
 
-export default function ShareProgress({ activity, distance, minutes, character, onClose }: ShareProgressProps) {
+export default function ShareProgress({ activity, distance, minutes, character, calories, steps, onClose }: ShareProgressProps) {
   const [copied, setCopied] = useState(false);
   const [showImage, setShowImage] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -24,8 +26,10 @@ export default function ShareProgress({ activity, distance, minutes, character, 
   const shareText = `🎯 Just completed my ${activityName.toLowerCase()} quest! ${activityEmoji}
 
 📊 Stats:
-• Distance: ${distance}km
-• Time: ${minutes} minutes
+• Target Distance: ${distance}km
+• Time: ${minutes} minutes${calories !== undefined ? `
+• Calories: ${calories}` : ''}${steps !== undefined ? `
+• Steps: ${steps.toLocaleString()}` : ''}
 • Character: ${character === "degen" ? "Degen 🦍" : "Runner 🏃‍♂️"}
 
 Building healthy habits onchain! 💪
@@ -105,19 +109,31 @@ Building healthy habits onchain! 💪
         </div>
 
         <div className="space-y-4">
-          <div className="p-4 bg-gradient-to-r from-blue-50 to-green-50 rounded-lg">
+          <div className="p-4 bg-gray-50 rounded-lg border border-gray-300">
             <div className="text-center space-y-2">
               <div className="text-3xl">{activityEmoji}</div>
               <h3 className="font-semibold text-gray-900">{activityName} Quest Completed!</h3>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <div className="font-bold text-lg text-blue-600">{distance}km</div>
-                  <div className="text-gray-600">Distance</div>
+                  <div className="font-bold text-lg text-gray-900">{distance}km</div>
+                  <div className="text-gray-600">Target Distance</div>
                 </div>
                 <div>
-                  <div className="font-bold text-lg text-green-600">{minutes}min</div>
+                  <div className="font-bold text-lg text-gray-900">{minutes}min</div>
                   <div className="text-gray-600">Duration</div>
                 </div>
+                {calories !== undefined && (
+                  <div>
+                    <div className="font-bold text-lg text-gray-900">{calories}</div>
+                    <div className="text-gray-600">Calories</div>
+                  </div>
+                )}
+                {steps !== undefined && (
+                  <div>
+                    <div className="font-bold text-lg text-gray-900">{steps.toLocaleString()}</div>
+                    <div className="text-gray-600">Steps</div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -134,7 +150,7 @@ Building healthy habits onchain! 💪
                 onClick={copyToClipboard}
                 className={`flex items-center justify-center space-x-2 px-3 py-2 rounded-lg transition-colors font-medium text-sm ${
                   copied 
-                    ? "bg-green-100 text-green-700" 
+                    ? "bg-gray-200 text-gray-900" 
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
@@ -144,7 +160,7 @@ Building healthy habits onchain! 💪
 
               <button
                 onClick={() => setShowImage(!showImage)}
-                className="flex items-center justify-center space-x-2 px-3 py-2 bg-indigo-100 text-indigo-700 hover:bg-indigo-200 rounded-lg transition-colors font-medium text-sm"
+                className="flex items-center justify-center space-x-2 px-3 py-2 bg-gray-900 text-white hover:bg-black rounded-lg transition-colors font-medium text-sm"
               >
                 <ImageIcon className="w-4 h-4" />
                 <span>{showImage ? "Hide Image" : "Show Image"}</span>
@@ -164,7 +180,7 @@ Building healthy habits onchain! 💪
                 </div>
                 <button
                   onClick={downloadImage}
-                  className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium text-sm"
+                  className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-medium text-sm"
                 >
                   <Download className="w-4 h-4" />
                   <span>Download Image</span>
@@ -175,7 +191,7 @@ Building healthy habits onchain! 💪
             <div className="grid grid-cols-3 gap-2">
               <button
                 onClick={() => shareToSocial("twitter")}
-                className="flex items-center justify-center space-x-1 px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium"
+                className="flex items-center justify-center space-x-1 px-3 py-2 bg-gray-800 text-white rounded-lg hover:bg-black transition-colors text-sm font-medium"
               >
                 <span>𝕏</span>
                 <span>Twitter</span>
@@ -183,7 +199,7 @@ Building healthy habits onchain! 💪
               
               <button
                 onClick={() => shareToSocial("farcaster")}
-                className="flex items-center justify-center space-x-1 px-3 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors text-sm font-medium"
+                className="flex items-center justify-center space-x-1 px-3 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium"
               >
                 <span>🟣</span>
                 <span>Farcaster</span>
@@ -191,7 +207,7 @@ Building healthy habits onchain! 💪
               
               <button
                 onClick={() => shareToSocial("telegram")}
-                className="flex items-center justify-center space-x-1 px-3 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition-colors text-sm font-medium"
+                className="flex items-center justify-center space-x-1 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium"
               >
                 <span>✈️</span>
                 <span>Telegram</span>
@@ -205,6 +221,8 @@ Building healthy habits onchain! 💪
           distance={distance}
           minutes={minutes}
           character={character}
+          calories={calories}
+          steps={steps}
           onImageReady={handleImageReady}
         />
       </div>
