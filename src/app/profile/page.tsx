@@ -45,8 +45,10 @@ function ProfileContent() {
   ]);
 
   useEffect(() => {
-    const savedCharacter = localStorage.getItem('selectedCharacter') || character || 'degen';
-    setSelectedCharacter(savedCharacter);
+    if (typeof window !== 'undefined') {
+      const savedCharacter = localStorage.getItem('selectedCharacter') || character || 'degen';
+      setSelectedCharacter(savedCharacter);
+    }
   }, [character]);
 
   const xpPercentage = (userData.xp / userData.nextLevelXp) * 100;

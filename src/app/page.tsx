@@ -9,13 +9,18 @@ export default function Home() {
   const [hasSelectedCharacter, setHasSelectedCharacter] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const selectedCharacter = localStorage.getItem('selectedCharacter');
-    if (selectedCharacter) {
-      setHasSelectedCharacter(true);
-    } else {
-      setHasSelectedCharacter(false);
-      router.push("/onboarding");
-    }
+    const checkSelectedCharacter = () => {
+      if (typeof window !== 'undefined') {
+        const selectedCharacter = localStorage.getItem('selectedCharacter');
+        if (selectedCharacter) {
+          setHasSelectedCharacter(true);
+        } else {
+          setHasSelectedCharacter(false);
+          router.push("/onboarding");
+        }
+      }
+    };
+    checkSelectedCharacter();
   }, [router]);
 
   if (hasSelectedCharacter === null) {

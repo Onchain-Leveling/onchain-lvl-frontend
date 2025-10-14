@@ -48,8 +48,10 @@ export default function Homepage() {
   ]);
 
   useEffect(() => {
-    const character = localStorage.getItem('selectedCharacter') || 'degen';
-    setSelectedCharacter(character);
+    if (typeof window !== 'undefined') {
+      const character = localStorage.getItem('selectedCharacter') || 'degen';
+      setSelectedCharacter(character);
+    }
   }, []);
 
   const xpPercentage = (levelData.xp / levelData.nextLevelXp) * 100;
