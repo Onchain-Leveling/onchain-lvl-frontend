@@ -3,7 +3,7 @@
 import { Suspense } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Home, Activity, CheckSquare, User } from "lucide-react";
+import { Home, Activity, CheckSquare, User, Sparkles } from "lucide-react";
 
 function BottomNavbarContent() {
   const pathname = usePathname();
@@ -15,25 +15,36 @@ function BottomNavbarContent() {
       name: "Home",
       href: "/",
       icon: Home,
-      active: pathname === "/"
+      active: pathname === "/",
+      isCenter: false
     },
     {
       name: "Activity",
       href: `/activity?character=${character}`,
       icon: Activity,
-      active: pathname === "/activity"
+      active: pathname === "/activity",
+      isCenter: false
+    },
+    {
+      name: "AI",
+      href: "/ai-analyzer",
+      icon: Sparkles,
+      active: pathname === "/ai-analyzer",
+      isCenter: true
     },
     {
       name: "Tasks",
       href: `/tasks?character=${character}`,
       icon: CheckSquare,
-      active: pathname === "/tasks"
+      active: pathname === "/tasks",
+      isCenter: false
     },
     {
       name: "Profile",
       href: `/profile?character=${character}`,
       icon: User,
-      active: pathname === "/profile"
+      active: pathname === "/profile",
+      isCenter: false
     }
   ];
 
@@ -42,6 +53,29 @@ function BottomNavbarContent() {
       <div className="flex items-center justify-around px-2 py-2">
         {navItems.map((item) => {
           const Icon = item.icon;
+          
+          if (item.isCenter) {
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`flex flex-col items-center justify-center transition-all -mt-10 ${
+                  item.active
+                    ? "text-white"
+                    : "text-white hover:scale-105"
+                }`}
+              >
+                <div className={`w-17 h-17 rounded-full flex items-center justify-center ${
+                  item.active
+                    ? "bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg"
+                    : "bg-gradient-to-r from-blue-500 to-purple-500 shadow-md"
+                }`}>
+                  <Icon className="w-6 h-6" />
+                </div>
+              </Link>
+            );
+          }
+          
           return (
             <Link
               key={item.name}
