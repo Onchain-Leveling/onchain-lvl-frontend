@@ -60,7 +60,7 @@ export default function Homepage() {
   return (
     <div className="min-h-screen bg-white pb-20">
       <div className="max-w-md mx-auto p-6">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-8 p-4 border border-gray-100 rounded-xl bg-gray-200/30">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Welcome back</h1>
             <p>Bima Jadiva!</p>
@@ -74,7 +74,7 @@ export default function Homepage() {
           </div>
         </div>
 
-        <div className="mb-8">
+        <div className="mb-8 p-4 border border-gray-100 rounded-xl bg-gray-50/30">
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-medium text-gray-600">{levelData.xp} XP</span>
             <span className="text-sm text-gray-400">{levelData.nextLevelXp} XP</span>
@@ -90,7 +90,7 @@ export default function Homepage() {
           </p>
         </div>
 
-        <div className="mb-8">
+        <div className="mb-8 p-4 border border-gray-100 rounded-xl bg-gray-50/30">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900">Today's Tasks</h2>
             <span className="text-sm text-gray-500">{completedTasks}/{dailyTasks.length}</span>
