@@ -18,6 +18,12 @@ export const metadata: Metadata = {
   title: "Onchain Leveling",
   description: "Level up your onchain experience through real-world activities",
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "https://yourdomain.com"),
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+  },
   openGraph: {
     title: "Onchain Leveling",
     description: "Level up your onchain experience through real-world activities",

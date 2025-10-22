@@ -119,6 +119,18 @@
     @apply bg-background text-foreground;
   }
   
+  /* Mobile optimizations */
+  html, body {
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    -webkit-text-size-adjust: 100%;
+  }
+  
+  /* Ensure proper mobile rendering */
+  * {
+    box-sizing: border-box;
+  }
+  
   /* Hide number input spinners */
   input[type="number"]::-webkit-outer-spin-button,
   input[type="number"]::-webkit-inner-spin-button {
