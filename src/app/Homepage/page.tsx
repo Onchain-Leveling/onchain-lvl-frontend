@@ -92,7 +92,7 @@ export default function Homepage() {
 
         <div className="mb-8 p-4 border border-gray-100 rounded-xl bg-gray-50/30">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Today's Tasks</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Today&apos;s Tasks</h2>
             <span className="text-sm text-gray-500">{completedTasks}/{dailyTasks.length}</span>
           </div>
           

@@ -4,7 +4,7 @@ import { useState, Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Lottie from "lottie-react";
-import { Calculator, Clock, MapPin, Footprints, Flame } from "lucide-react";
+// import { Calculator, Clock, MapPin, Footprints, Flame } from "lucide-react";
 import hamsterRun from "../../../public/Assets/Animation/hamster-run.json";
 import boxWalking from "../../../public/Assets/Animation/box-walking.json";
 import BottomNavbar from "../../components/BottomNavbar";
@@ -184,7 +184,7 @@ function ActivitySelectionContent() {
               </div>
             </div>
 
-            {metrics && (
+            {/* {metrics && (
               <div className="bg-white border border-gray-200 p-6 rounded-xl">
                 <div className="flex items-center space-x-2 mb-4">
                   <Calculator className="w-5 h-5 text-gray-600" />
@@ -237,7 +237,7 @@ function ActivitySelectionContent() {
                   </div>
                 </div>
               </div>
-            )}
+            )} */}
 
             <Link
               href={`/quest?character=${character}&activity=${selectedActivity}&minutes=${typeof minutes === 'string' ? parseFloat(minutes) || 0.1 : minutes}&distance=${finalDistance}&weight=${weight}&calories=${metrics?.calories}&steps=${metrics?.steps}`}

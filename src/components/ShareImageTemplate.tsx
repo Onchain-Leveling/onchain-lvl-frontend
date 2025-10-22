@@ -135,7 +135,7 @@ export default function ShareImageTemplate({
         setHasGenerated(true); // Mark as generated
       }
     }, "image/png");
-  }, [hasGenerated, activity, distance, minutes, calories, steps, onImageReady, activityEmoji, activityName, characterEmoji, characterName]);
+  }, [hasGenerated, distance, minutes, calories, steps, onImageReady, activityEmoji, activityName, characterEmoji, characterName]);
 
   useEffect(() => {
     // Reset generation state when props change

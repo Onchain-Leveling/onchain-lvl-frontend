@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CheckCircle, AlertCircle, TrendingUp } from "lucide-react";
+import { CheckCircle, AlertCircle } from "lucide-react";
 import Lottie from "lottie-react";
 import degenCharacter from "../../../public/Assets/Animation/degen-character.json";
 import runnerCharacter from "../../../public/Assets/Animation/runner-character.json";
@@ -99,7 +99,7 @@ export default function AIAnalyzer() {
 
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Today's Tasks</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Today&apos;s Tasks</h2>
               <span className="text-sm text-gray-500">{completedTasks}/{todayTasks.length}</span>
             </div>
             

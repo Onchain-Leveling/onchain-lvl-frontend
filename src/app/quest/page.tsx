@@ -23,7 +23,7 @@ function QuestContent() {
   const activity = searchParams.get("activity") || "run";
   const minutes = Number(searchParams.get("minutes")) || 30;
   const distance = Number(searchParams.get("distance")) || 5;
-  const weight = Number(searchParams.get("weight")) || 70;
+  // const weight = Number(searchParams.get("weight")) || 70;
   const calories = Number(searchParams.get("calories")) || 0;
   const steps = Number(searchParams.get("steps")) || 0;
 

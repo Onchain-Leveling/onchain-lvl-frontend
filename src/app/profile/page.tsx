@@ -166,14 +166,6 @@ function ProfileContent() {
             <Trophy className="w-4 h-4" />
             <span>View Leaderboard</span>
           </Link>
-          <div className="grid grid-cols-2 gap-3">
-            <button className="py-2 px-4 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors text-sm font-medium">
-              Edit Profile
-            </button>
-            <button className="py-2 px-4 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors text-sm font-medium">
-              Settings
-            </button>
-          </div>
         </div>
       </div>
       <BottomNavbar />
