@@ -7,6 +7,7 @@ import Lottie from "lottie-react";
 import { CheckCircle, Circle } from "lucide-react";
 import dailyTaskAnimation from "../../../public/Assets/Animation/daily-task.json";
 import BottomNavbar from "../../components/BottomNavbar";
+import SuccessModal from "../../components/SuccessModal";
 
 interface Task {
   id: string;
@@ -23,6 +24,9 @@ function DailyTasksContent() {
     { id: "walking", title: "Walking", current: 0, target: 5, unit: "km", completed: false },
     { id: "situps", title: "Sit-ups", current: 0, target: 10, unit: "reps", completed: false },
   ]);
+  
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [claimedExp, setClaimedExp] = useState(0);
 
   const searchParams = useSearchParams();
   const character = searchParams.get("character");
@@ -155,7 +159,8 @@ function DailyTasksContent() {
                     if (!task.completed) {
                       updateTask(task.id, task.target - task.current);
                     } else {
-                      console.log("Claim EXP:", task.title);
+                      setClaimedExp(200);
+                      setShowSuccessModal(true);
                     }
                   }}
                   className={`${!task.completed ? "flex-1" : "w-full"} px-4 py-2 rounded-xl transition-all text-sm font-semibold ${
@@ -187,6 +192,13 @@ function DailyTasksContent() {
           </Link>
         </div>
       </div>
+      
+      <SuccessModal 
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        exp={claimedExp}
+      />
+      
       <BottomNavbar />
     </div>
   );

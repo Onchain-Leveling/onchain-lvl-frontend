@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-// import Link from "next/link";
 import Image from "next/image";
 import Lottie from "lottie-react";
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { useAccount } from 'wagmi';
 import { useFarcaster } from "../../components/FarcasterProvider";
 import degenCharacter from "../../../public/Assets/Animation/degen-character.json";
 import runnerCharacter from "../../../public/Assets/Animation/runner-character.json";
@@ -11,11 +12,52 @@ import runnerCharacter from "../../../public/Assets/Animation/runner-character.j
 export default function CharacterSelection() {
   const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
   const { isReady } = useFarcaster();
+  const { isConnected } = useAccount();
 
   if (!isReady) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 flex items-center justify-center p-4">
         <div className="text-center">Loading...</div>
+      </div>
+    );
+  }
+
+  // Show wallet connection step first
+  if (!isConnected) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 flex items-center justify-center p-4">
+        <div className="max-w-md w-full space-y-8 text-center">
+          <div className="space-y-6">
+            <div className="flex justify-center">
+              <Image
+                src="/Assets/Logo/logo-onchain-leveling.png"
+                alt="Onchain Leveling"
+                width={100}
+                height={80}
+                className="object-contain"
+                priority
+              />
+            </div>
+            
+            <div className="space-y-4">
+              <h1 className="text-3xl font-semibold text-gray-900">
+                Welcome to Onchain Leveling
+              </h1>
+              <p className="text-gray-600">
+                Connect your wallet to start your fitness and crypto journey
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex justify-center">
+              <ConnectButton />
+            </div>
+            <p className="text-sm text-gray-500">
+              Your wallet will be used to track your onchain achievements and rewards
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
