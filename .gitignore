@@ -10,6 +10,8 @@
 !.yarn/releases
 !.yarn/versions
 CLAUDE.md
+.well-known/
+vercel.json
 
 # testing
 /coverage
