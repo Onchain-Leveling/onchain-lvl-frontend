@@ -39,7 +39,7 @@ const calculateMetrics = (activity: string, minutes: number, weight: number) => 
 function ActivitySelectionContent() {
   const [selectedActivity, setSelectedActivity] = useState<string | null>("run");
   const [minutes, setMinutes] = useState<number | string>(30);
-  const [weight, setWeight] = useState(70); // Default weight in kg
+  const [weight, setWeight] = useState<number | string>(70); // Default weight in kg
   const [customDistance, setCustomDistance] = useState<number | null>(null);
   const searchParams = useSearchParams();
   const character = searchParams.get("character");
@@ -48,7 +48,8 @@ function ActivitySelectionContent() {
   const metrics = useMemo(() => {
     if (!selectedActivity) return null;
     const minutesNum = typeof minutes === 'string' ? parseFloat(minutes) || 0 : minutes;
-    return calculateMetrics(selectedActivity, minutesNum, weight);
+    const weightNum = typeof weight === 'string' ? parseFloat(weight) || 70 : weight;
+    return calculateMetrics(selectedActivity, minutesNum, weightNum);
   }, [selectedActivity, minutes, weight]);
 
   // Use custom distance if provided, otherwise use estimated
@@ -106,6 +107,7 @@ function ActivitySelectionContent() {
                   </label>
                   <input
                     type="number"
+                    inputMode="decimal"
                     value={minutes}
                     onChange={(e) => {
                       const value = e.target.value;
@@ -140,16 +142,33 @@ function ActivitySelectionContent() {
                   </label>
                   <input
                     type="number"
+                    inputMode="numeric"
                     value={weight}
                     onChange={(e) => {
-                      const value = Number(e.target.value);
-                      if (value >= 30 && value <= 200) {
-                        setWeight(value);
+                      const value = e.target.value;
+                      if (value === '') {
+                        setWeight('');
+                      } else {
+                        const num = parseFloat(value);
+                        if (!isNaN(num) && num >= 0 && num <= 300) {
+                          setWeight(value);
+                        }
+                      }
+                    }}
+                    onBlur={(e) => {
+                      const value = e.target.value;
+                      if (value === '' || parseFloat(value) < 30) {
+                        setWeight(70);
+                      } else if (parseFloat(value) > 200) {
+                        setWeight(200);
+                      } else {
+                        setWeight(parseFloat(value));
                       }
                     }}
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-sm"
                     min="30"
                     max="200"
+                    placeholder="70"
                   />
                 </div>
               </div>
@@ -160,14 +179,15 @@ function ActivitySelectionContent() {
                 </label>
                 <input
                   type="number"
+                  inputMode="decimal"
                   value={customDistance || ''}
                   onChange={(e) => {
                     const value = e.target.value;
                     if (value === '') {
                       setCustomDistance(null);
                     } else {
-                      const num = Number(value);
-                      if (num >= 0.1 && num <= 50) {
+                      const num = parseFloat(value);
+                      if (!isNaN(num) && num >= 0 && num <= 50) {
                         setCustomDistance(num);
                       }
                     }
@@ -240,7 +260,7 @@ function ActivitySelectionContent() {
             )} */}
 
             <Link
-              href={`/quest?character=${character}&activity=${selectedActivity}&minutes=${typeof minutes === 'string' ? parseFloat(minutes) || 0.1 : minutes}&distance=${finalDistance}&weight=${weight}&calories=${metrics?.calories}&steps=${metrics?.steps}`}
+              href={`/quest?character=${character}&activity=${selectedActivity}&minutes=${typeof minutes === 'string' ? parseFloat(minutes) || 0.1 : minutes}&distance=${finalDistance}&weight=${typeof weight === 'string' ? parseFloat(weight) || 70 : weight}&calories=${metrics?.calories}&steps=${metrics?.steps}`}
               className="block w-full bg-black text-white py-4 rounded-xl hover:bg-gray-800 transition-colors font-semibold text-center"
             >
               Start {selectedActivity === "run" ? "Running" : "Walking"} Quest
