@@ -176,6 +176,13 @@ export const OnchainLevelingABI = [
     type: "function",
   },
   {
+    inputs: [{ internalType: "uint256", name: "taskId", type: "uint256" }],
+    name: "completeTask",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
     inputs: [
       { internalType: "string", name: "name", type: "string" },
       { internalType: "uint8", name: "ttype", type: "uint8" },

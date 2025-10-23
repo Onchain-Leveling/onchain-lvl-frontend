@@ -6,14 +6,17 @@ import Lottie from "lottie-react";
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
 import { useFarcaster } from "../../components/FarcasterProvider";
+import { useRegister, CHARACTER_TYPES } from "../../hooks/useRegister";
 import degenCharacter from "../../../public/Assets/Animation/degen-character.json";
 import runnerCharacter from "../../../public/Assets/Animation/runner-character.json";
 
 export default function CharacterSelection() {
   const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
+  const [playerName, setPlayerName] = useState("");
   const [loadingProgress, setLoadingProgress] = useState(0);
   const { isReady } = useFarcaster();
   const { isConnected } = useAccount();
+  const { register, isPending, isConfirming, isSuccess, error } = useRegister();
 
   // Progress simulation for better UX on mobile
   useEffect(() => {
@@ -25,13 +28,21 @@ export default function CharacterSelection() {
         });
       }, 200);
 
-      return () => clearInterval(interval);
+      // Fallback timeout to prevent infinite loading
+      const timeout = setTimeout(() => {
+        setLoadingProgress(100);
+      }, 5000); // 5 second timeout
+
+      return () => {
+        clearInterval(interval);
+        clearTimeout(timeout);
+      };
     } else {
       setLoadingProgress(100);
     }
   }, [isReady]);
 
-  if (!isReady) {
+  if (!isReady && loadingProgress < 100) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 flex items-center justify-center p-4">
         <div className="text-center space-y-6 max-w-xs w-full">
@@ -127,15 +138,33 @@ export default function CharacterSelection() {
           
           <div className="space-y-4">
             <h1 className="text-3xl font-semibold text-gray-900">
-              Choose Your Character
+              Create Your Profile
             </h1>
             <p className="text-gray-600">
-              Select a character to start your Onchain Leveling journey
+              Enter your name and choose a character to start your journey
             </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-6">
+        <div className="space-y-6">
+          <div className="space-y-2 text-left">
+            <label htmlFor="playerName" className="block text-sm font-medium text-gray-900">
+              Player Name
+            </label>
+            <input
+              id="playerName"
+              type="text"
+              value={playerName}
+              onChange={(e) => setPlayerName(e.target.value)}
+              placeholder="Enter your player name"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              maxLength={20}
+            />
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-gray-900 text-center">Choose Your Character</h3>
+            <div className="grid grid-cols-2 gap-6">
           <div
             className={`p-6 rounded-lg border-2 cursor-pointer transition-all ${
               selectedCharacter === "degen"
@@ -165,6 +194,8 @@ export default function CharacterSelection() {
             <h3 className="font-medium text-gray-900">Runner</h3>
             <p className="text-sm text-gray-600 mt-1">The fitness lover</p>
           </div>
+            </div>
+          </div>
         </div>
 
         {!selectedCharacter && (
@@ -173,18 +204,46 @@ export default function CharacterSelection() {
           </div>
         )}
 
-        {selectedCharacter && (
-          <button
-            onClick={() => {
-              if (typeof window !== 'undefined') {
-                localStorage.setItem('selectedCharacter', selectedCharacter);
-                window.location.href = '/';
-              }
-            }}
-            className="inline-flex items-center justify-center w-full px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
-          >
-            Continue with {selectedCharacter === "degen" ? "Degen" : "Runner"}
-          </button>
+        {selectedCharacter && playerName.trim() && (
+          <div className="space-y-4">
+            {error && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                {error.message || "Registration failed. Please try again."}
+              </div>
+            )}
+            
+            <button
+              onClick={() => {
+                const characterType = selectedCharacter === "degen" ? CHARACTER_TYPES.DEGEN : CHARACTER_TYPES.RUNNER;
+                register(playerName.trim(), characterType);
+              }}
+              disabled={isPending || isConfirming}
+              className="inline-flex items-center justify-center w-full px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isPending && "Preparing transaction..."}
+              {isConfirming && "Confirming registration..."}
+              {!isPending && !isConfirming && `Register as ${selectedCharacter === "degen" ? "Degen" : "Runner"}`}
+            </button>
+          </div>
+        )}
+
+        {isSuccess && (
+          <div className="space-y-4">
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 text-center">
+              <h3 className="font-medium">Registration Successful!</h3>
+              <p className="text-sm mt-1">Welcome to Onchain Leveling, {playerName}!</p>
+            </div>
+            <button
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  window.location.href = '/';
+                }
+              }}
+              className="inline-flex items-center justify-center w-full px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+            >
+              Continue to Dashboard
+            </button>
+          </div>
         )}
       </div>
     </div>
