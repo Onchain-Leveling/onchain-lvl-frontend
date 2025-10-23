@@ -3,7 +3,9 @@
 import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Trophy, Calendar, Activity } from "lucide-react";
+import { Trophy, Calendar, Activity, Wallet } from "lucide-react";
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { useAccount } from 'wagmi';
 import Lottie from "lottie-react";
 import degenCharacter from "../../../public/Assets/Animation/degen-character.json";
 import runnerCharacter from "../../../public/Assets/Animation/runner-character.json";
@@ -13,6 +15,7 @@ function ProfileContent() {
   const searchParams = useSearchParams();
   const character = searchParams.get("character") || "degen";
   const [selectedCharacter, setSelectedCharacter] = useState<string>("degen");
+  const { isConnected } = useAccount();
   
   const [userData] = useState({
     name: "Bima Jadiva",
@@ -51,8 +54,37 @@ function ProfileContent() {
     }
   }, [character]);
 
+  // Redirect to onboarding if wallet is disconnected
+  useEffect(() => {
+    if (!isConnected) {
+      // Small delay to ensure proper state updates
+      const timer = setTimeout(() => {
+        if (typeof window !== 'undefined') {
+          window.location.href = '/onboarding';
+        }
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isConnected]);
+
   const xpPercentage = (userData.xp / userData.nextLevelXp) * 100;
   const unlockedAchievements = achievements.filter(a => a.unlocked).length;
+
+  // Show loading state when wallet is disconnected and redirecting
+  if (!isConnected) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center space-y-4 max-w-xs w-full">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black mx-auto"></div>
+          <div className="space-y-2">
+            <p className="text-gray-900 font-medium">Wallet Disconnected</p>
+            <p className="text-gray-600 text-sm">Redirecting to connect wallet...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white pb-20">
@@ -159,6 +191,68 @@ function ProfileContent() {
         </div>
 
         <div className="space-y-3">
+          <div className="w-full">
+            <div className="flex items-center space-x-2 mb-3">
+              <Wallet className="w-4 h-4 text-gray-600" />
+              <span className="text-sm font-medium text-gray-600">Wallet Connection</span>
+            </div>
+            <div className="w-full">
+              <ConnectButton.Custom>
+                {({
+                  account,
+                  chain,
+                  openAccountModal,
+                  openChainModal,
+                  openConnectModal,
+                  mounted,
+                }) => {
+                  const ready = mounted;
+                  const connected = ready && account && chain;
+
+                  return (
+                    <div
+                      {...(!ready && {
+                        'aria-hidden': true,
+                        'style': {
+                          opacity: 0,
+                          pointerEvents: 'none',
+                          userSelect: 'none',
+                        },
+                      })}
+                    >
+                      {(() => {
+                        if (!connected) {
+                          return (
+                            <button
+                              onClick={openConnectModal}
+                              className="w-full bg-gray-100 text-gray-700 py-3 rounded-xl font-medium hover:bg-gray-200 transition-colors flex items-center justify-center space-x-2"
+                            >
+                              <Wallet className="w-4 h-4" />
+                              <span>Connect Wallet</span>
+                            </button>
+                          );
+                        }
+
+                        return (
+                          <button
+                            onClick={openAccountModal}
+                            className="w-full bg-gray-100 text-gray-700 py-3 rounded-xl font-medium hover:bg-gray-200 transition-colors flex items-center justify-center space-x-2"
+                          >
+                            <Wallet className="w-4 h-4" />
+                            <span>
+                              {account.displayName}
+                              {account.displayBalance ? ` (${account.displayBalance})` : ''}
+                            </span>
+                          </button>
+                        );
+                      })()}
+                    </div>
+                  );
+                }}
+              </ConnectButton.Custom>
+            </div>
+          </div>
+          
           <Link
             href="/leaderboard"
             className="w-full bg-black text-white py-3 rounded-xl font-medium hover:bg-gray-800 transition-colors flex items-center justify-center space-x-2"

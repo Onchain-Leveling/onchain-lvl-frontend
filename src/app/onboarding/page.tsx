@@ -7,6 +7,7 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
 import { useFarcaster } from "../../components/FarcasterProvider";
 import { useRegister, CHARACTER_TYPES } from "../../hooks/useRegister";
+import { useRegistrationStatus } from "../../hooks/useRegistrationStatus";
 import degenCharacter from "../../../public/Assets/Animation/degen-character.json";
 import runnerCharacter from "../../../public/Assets/Animation/runner-character.json";
 
@@ -17,6 +18,7 @@ export default function CharacterSelection() {
   const { isReady } = useFarcaster();
   const { isConnected } = useAccount();
   const { register, isPending, isConfirming, isSuccess, error } = useRegister();
+  const { isRegistered, isLoading: isCheckingRegistration, profile } = useRegistrationStatus();
 
   // Progress simulation for better UX on mobile
   useEffect(() => {
@@ -41,6 +43,20 @@ export default function CharacterSelection() {
       setLoadingProgress(100);
     }
   }, [isReady]);
+
+  // Redirect to homepage if user is already registered
+  useEffect(() => {
+    if (isConnected && isRegistered && profile) {
+      // Small delay to ensure proper loading states
+      const timer = setTimeout(() => {
+        if (typeof window !== 'undefined') {
+          window.location.href = '/';
+        }
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isConnected, isRegistered, profile]);
 
   if (!isReady && loadingProgress < 100) {
     return (
@@ -75,6 +91,65 @@ export default function CharacterSelection() {
                loadingProgress < 90 ? 'Preparing interface...' :
                'Almost ready!'}
             </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading while checking registration status
+  if (isConnected && isCheckingRegistration) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 flex items-center justify-center p-4">
+        <div className="text-center space-y-6 max-w-xs w-full">
+          <div className="flex justify-center">
+            <Image
+              src="/Assets/Logo/logo-onchain-leveling.png"
+              alt="Onchain Leveling"
+              width={80}
+              height={64}
+              className="object-contain animate-pulse"
+              priority
+            />
+          </div>
+          
+          <div className="space-y-3">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="text-gray-600 text-sm">Checking registration status...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show welcome message if user is already registered
+  if (isConnected && isRegistered && profile) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 flex items-center justify-center p-4">
+        <div className="text-center space-y-6 max-w-md w-full">
+          <div className="flex justify-center">
+            <Image
+              src="/Assets/Logo/logo-onchain-leveling.png"
+              alt="Onchain Leveling"
+              width={100}
+              height={80}
+              className="object-contain"
+              priority
+            />
+          </div>
+          
+          <div className="space-y-4">
+            <h1 className="text-3xl font-semibold text-gray-900">
+              Welcome back, {profile.name}!
+            </h1>
+            <p className="text-gray-600">
+              You're already registered. Redirecting to your dashboard...
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600 mx-auto"></div>
+            <p className="text-gray-500 text-sm">Taking you to your dashboard</p>
           </div>
         </div>
       </div>
