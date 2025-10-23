@@ -1,14 +1,35 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Home, Activity, CheckSquare, User, Sparkles } from "lucide-react";
+import { useAccount } from 'wagmi';
+import { useGetProfile } from '../hooks/useGetProfile';
+import { CHARACTER_TYPES } from '../hooks/useRegister';
 
 function BottomNavbarContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const character = searchParams.get("character") || "degen";
+  const { address } = useAccount();
+  const { profile } = useGetProfile(address);
+  const [selectedCharacter, setSelectedCharacter] = useState<string>("degen");
+
+  // Set character based on profile data
+  useEffect(() => {
+    if (profile?.isRegistered && profile.characterType) {
+      const characterFromProfile = profile.characterType === CHARACTER_TYPES.DEGEN ? 'degen' : 'runner';
+      setSelectedCharacter(characterFromProfile);
+    } else {
+      const urlCharacter = searchParams.get("character");
+      if (urlCharacter) {
+        setSelectedCharacter(urlCharacter);
+      } else if (typeof window !== 'undefined') {
+        const savedCharacter = localStorage.getItem('selectedCharacter') || 'degen';
+        setSelectedCharacter(savedCharacter);
+      }
+    }
+  }, [profile?.characterType, profile?.isRegistered, searchParams]);
 
   const navItems = [
     {
@@ -20,7 +41,7 @@ function BottomNavbarContent() {
     },
     {
       name: "Activity",
-      href: `/activity?character=${character}`,
+      href: `/activity?character=${selectedCharacter}`,
       icon: Activity,
       active: pathname === "/activity",
       isCenter: false
@@ -34,14 +55,14 @@ function BottomNavbarContent() {
     },
     {
       name: "Tasks",
-      href: `/tasks?character=${character}`,
+      href: `/tasks?character=${selectedCharacter}`,
       icon: CheckSquare,
       active: pathname === "/tasks",
       isCenter: false
     },
     {
       name: "Profile",
-      href: `/profile?character=${character}`,
+      href: `/profile?character=${selectedCharacter}`,
       icon: User,
       active: pathname === "/profile",
       isCenter: false

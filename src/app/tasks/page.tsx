@@ -3,6 +3,11 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useAccount } from 'wagmi';
+import { useGetTaskList, type TaskDef } from '../../hooks/useGetTaskList';
+import { useCompleteTask } from '../../hooks/useCompleteTask';
+import { useGetProfile } from '../../hooks/useGetProfile';
+import { CHARACTER_TYPES } from '../../hooks/useRegister';
 import Lottie from "lottie-react";
 import { CheckCircle, Circle } from "lucide-react";
 import dailyTaskAnimation from "../../../public/Assets/Animation/daily-task.json";
@@ -19,14 +24,15 @@ interface Task {
 }
 
 function DailyTasksContent() {
-  const [tasks, setTasks] = useState<Task[]>([
-    { id: "running", title: "Running", current: 0, target: 1, unit: "km", completed: false },
-    { id: "walking", title: "Walking", current: 0, target: 5, unit: "km", completed: false },
-    { id: "situps", title: "Sit-ups", current: 0, target: 10, unit: "reps", completed: false },
-  ]);
+  const { isConnected, address } = useAccount();
+  const { tasks: contractTasks, isLoading: isTasksLoading, error: tasksError } = useGetTaskList();
+  const { completeTask, isPending, isConfirming, isSuccess, error: completeError } = useCompleteTask();
+  const { profile } = useGetProfile(address);
   
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [claimedExp, setClaimedExp] = useState(0);
+  const [completingTaskId, setCompletingTaskId] = useState<bigint | null>(null);
+  const [selectedCharacter, setSelectedCharacter] = useState<string>("degen");
 
   const searchParams = useSearchParams();
   const character = searchParams.get("character");
@@ -34,47 +40,84 @@ function DailyTasksContent() {
   const minutes = searchParams.get("minutes");
   const distance = searchParams.get("distance");
 
+  // Redirect to onboarding if wallet is not connected
   useEffect(() => {
-    if (activity && distance) {
-      setTasks(prevTasks => 
-        prevTasks.map(task => {
-          const taskActivityMap = {
-            "run": "running",
-            "walk": "walking"
-          };
-          
-          if (task.id === taskActivityMap[activity as keyof typeof taskActivityMap]) {
-            const newCurrent = Math.min(task.current + Number(distance), task.target);
-            return {
-              ...task,
-              current: newCurrent,
-              completed: newCurrent >= task.target
-            };
-          }
-          return task;
-        })
-      );
-    }
-  }, [activity, distance]);
-
-  const updateTask = (taskId: string, increment: number) => {
-    setTasks(prevTasks =>
-      prevTasks.map(task => {
-        if (task.id === taskId) {
-          const newCurrent = Math.min(task.current + increment, task.target);
-          return {
-            ...task,
-            current: newCurrent,
-            completed: newCurrent >= task.target
-          };
+    if (!isConnected) {
+      const timer = setTimeout(() => {
+        if (typeof window !== 'undefined') {
+          window.location.href = '/onboarding';
         }
-        return task;
-      })
-    );
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [isConnected]);
+
+  // Handle successful task completion
+  useEffect(() => {
+    if (isSuccess && completingTaskId) {
+      const completedTask = contractTasks.find(task => task.id === completingTaskId);
+      if (completedTask) {
+        setClaimedExp(completedTask.xp);
+        setShowSuccessModal(true);
+        setCompletingTaskId(null);
+      }
+    }
+  }, [isSuccess, completingTaskId, contractTasks]);
+
+  // Set character based on profile data
+  useEffect(() => {
+    if (profile?.isRegistered && profile.characterType) {
+      const characterFromProfile = profile.characterType === CHARACTER_TYPES.DEGEN ? 'degen' : 'runner';
+      setSelectedCharacter(characterFromProfile);
+    } else if (character) {
+      setSelectedCharacter(character);
+    }
+  }, [profile?.characterType, profile?.isRegistered, character]);
+
+  // Handle complete task
+  const handleCompleteTask = (taskId: bigint, xp: number) => {
+    setCompletingTaskId(taskId);
+    completeTask(taskId);
   };
 
-  const completedTasks = tasks.filter(task => task.completed).length;
-  const totalXP = completedTasks * 100;
+  // Calculate stats from contract tasks
+  const enabledTasks = contractTasks.filter(task => task.enabled);
+  const totalXP = enabledTasks.reduce((sum, task) => sum + task.xp, 0);
+
+  // Show loading state
+  if (!isConnected || isTasksLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-yellow-50 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600 mx-auto"></div>
+          <p className="text-gray-600">Loading tasks...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (tasksError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-yellow-50 flex items-center justify-center">
+        <div className="text-center space-y-4 max-w-xs w-full">
+          <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto">
+            <span className="text-red-600 text-xl">⚠</span>
+          </div>
+          <div className="space-y-2">
+            <p className="text-gray-900 font-medium">Failed to Load Tasks</p>
+            <p className="text-gray-600 text-sm">Unable to fetch task data. Please try again.</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-yellow-50 p-8 pb-20">
@@ -97,95 +140,81 @@ function DailyTasksContent() {
             )}
             <div className="inline-flex items-center space-x-4 text-sm">
               <span className="text-gray-600">
-                {completedTasks}/{tasks.length} completed
+                {enabledTasks.length} tasks available
               </span>
               <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-medium">
-                {totalXP} XP
+                Up to {totalXP} XP
               </span>
             </div>
           </div>
         </div>
 
         <div className="space-y-4">
-          {tasks.map((task) => (
-            <div
-              key={task.id}
-              className={`p-5 rounded-2xl border transition-all ${
-                task.completed
-                  ? "border-emerald-200 bg-emerald-50/50"
-                  : "border-gray-100 bg-white shadow-sm"
-              }`}
-            >
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center space-x-3">
-                  {task.completed ? (
-                    <CheckCircle className="w-5 h-5 text-emerald-500" />
-                  ) : (
+          {enabledTasks.map((task) => {
+            const isProcessing = isPending && completingTaskId === task.id;
+            const isConfirmingTx = isConfirming && completingTaskId === task.id;
+            
+            return (
+              <div
+                key={task.id.toString()}
+                className="p-5 rounded-2xl border border-gray-100 bg-white shadow-sm transition-all"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center space-x-3">
                     <Circle className="w-5 h-5 text-gray-300" />
-                  )}
-                  <h3 className="font-semibold text-gray-900">{task.title}</h3>
+                    <h3 className="font-semibold text-gray-900">{task.name}</h3>
+                  </div>
+                  <span className="text-xs font-medium px-2 py-1 rounded-full bg-amber-100 text-amber-700">
+                    +{task.xp} XP
+                  </span>
                 </div>
-                <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                  task.completed 
-                    ? "bg-emerald-100 text-emerald-700" 
-                    : "bg-gray-100 text-gray-600"
-                }`}>
-                  {task.current}/{task.target} {task.unit}
-                </span>
-              </div>
 
-              <div className="mb-4">
-                <div className="w-full bg-gray-100 rounded-full h-1.5">
-                  <div
-                    className={`h-1.5 rounded-full transition-all ${
-                      task.completed ? "bg-emerald-400" : "bg-gradient-to-r from-blue-400 to-purple-500"
-                    }`}
-                    style={{ width: `${Math.min((task.current / task.target) * 100, 100)}%` }}
-                  ></div>
+                <div className="mb-4">
+                  <p className="text-sm text-gray-600 mb-2">
+                    Goal: {task.goal} {task.type === 1 ? 'steps' : task.type === 2 ? 'minutes' : 'units'}
+                  </p>
+                  <div className="w-full bg-gray-100 rounded-full h-1.5">
+                    <div
+                      className="h-1.5 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 transition-all"
+                      style={{ width: "0%" }}
+                    ></div>
+                  </div>
                 </div>
-              </div>
 
-              <div className="flex space-x-2">
-                {!task.completed && (
-                  <button
-                    onClick={() => updateTask(task.id, task.id === "situps" ? 1 : 0.5)}
-                    className="flex-1 px-3 py-2 bg-gray-50 text-gray-600 rounded-xl hover:bg-gray-100 transition-colors text-sm font-medium border border-gray-200"
-                  >
-                    +{task.id === "situps" ? "1" : "0.5"} {task.unit}
-                  </button>
+                {completeError && completingTaskId === task.id && (
+                  <div className="mb-3 p-2 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="text-red-700 text-xs">
+                      {completeError.message || "Failed to complete task. Please try again."}
+                    </p>
+                  </div>
                 )}
-                <button
-                  onClick={() => {
-                    if (!task.completed) {
-                      updateTask(task.id, task.target - task.current);
-                    } else {
-                      setClaimedExp(200);
-                      setShowSuccessModal(true);
-                    }
-                  }}
-                  className={`${!task.completed ? "flex-1" : "w-full"} px-4 py-2 rounded-xl transition-all text-sm font-semibold ${
-                    task.completed
-                      ? "bg-gradient-to-r from-amber-400 to-orange-500 text-white hover:from-amber-500 hover:to-orange-600 shadow-md"
-                      : "bg-black text-white hover:bg-gray-800 shadow-md"
-                  }`}
-                >
-                  {task.completed ? "Claim EXP" : "Complete"}
-                </button>
+
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => handleCompleteTask(task.id, task.xp)}
+                    disabled={isProcessing || isConfirmingTx}
+                    className="w-full px-4 py-2 rounded-xl transition-all text-sm font-semibold bg-black text-white hover:bg-gray-800 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isProcessing && "Preparing transaction..."}
+                    {isConfirmingTx && "Confirming completion..."}
+                    {!isProcessing && !isConfirmingTx && "Complete Task"}
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="space-y-4">
           <Link
-            href={`/profile?character=${character}&xp=${totalXP}`}
+            href={`/profile?character=${selectedCharacter}`}
             className="inline-flex items-center justify-center w-full px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
           >
             View Profile & Progress
           </Link>
           
           <Link
-            href={`/activity?character=${character}`}
+            href={`/activity?character=${selectedCharacter}`}
             className="inline-flex items-center justify-center w-full px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
           >
             Add Another Activity

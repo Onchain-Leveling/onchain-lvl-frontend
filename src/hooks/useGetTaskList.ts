@@ -11,7 +11,7 @@ export type TaskDef = {
   enabled: boolean
 }
 
-export function useGetTaskList(offset: bigint = 0n, limit: bigint = 10n) {
+export function useGetTaskList(offset: bigint = BigInt(0), limit: bigint = BigInt(10)) {
   const { data, isLoading, error, refetch } = useReadContract({
     address: CONTRACTS.ONCHAIN_LEVELING,
     abi: OnchainLevelingABI,
