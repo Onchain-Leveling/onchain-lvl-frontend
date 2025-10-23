@@ -2,6 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { CheckCircle, Clock, Users } from "lucide-react";
+import { useAccount } from 'wagmi';
+import { useGetProfile } from '../../hooks/useGetProfile';
+import { useGetNextLevelXp } from '../../hooks/useGetNextLevelXP';
+import { CHARACTER_TYPES } from '../../hooks/useRegister';
 import Lottie from "lottie-react";
 import degenCharacter from "../../../public/Assets/Animation/degen-character.json";
 import runnerCharacter from "../../../public/Assets/Animation/runner-character.json";
@@ -26,12 +30,14 @@ interface FriendActivity {
 
 export default function Homepage() {
   const [selectedCharacter, setSelectedCharacter] = useState<string>("degen");
+  const { isConnected, address } = useAccount();
+  const { profile, isLoading: isProfileLoading } = useGetProfile(address);
+  const { nextLevelXp: nextLevelData, isLoading: isNextLevelLoading } = useGetNextLevelXp(address);
   
-  const [levelData] = useState({
-    level: 5,
-    xp: 1250,
-    nextLevelXp: 1500,
-  });
+  // Calculate dynamic data from profile and smart contract
+  const currentXp = profile?.xp ? Number(profile.xp) : 0;
+  const remainingXp = nextLevelData?.remaining ? Number(nextLevelData.remaining) : 0;
+  const nextLevelCumulativeXp = nextLevelData?.nextLevelCumulative ? Number(nextLevelData.nextLevelCumulative) : 1000;
 
   const [dailyTasks] = useState<TaskData[]>([
     { name: "Running", progress: 0.8, target: 1, unit: "km", completed: false },
@@ -48,14 +54,71 @@ export default function Homepage() {
   ]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (profile?.isRegistered && profile.characterType) {
+      // Set character based on profile data from contract
+      const characterFromProfile = profile.characterType === CHARACTER_TYPES.DEGEN ? 'degen' : 'runner';
+      setSelectedCharacter(characterFromProfile);
+    } else if (typeof window !== 'undefined') {
+      // Fallback to localStorage if profile not loaded yet
       const character = localStorage.getItem('selectedCharacter') || 'degen';
       setSelectedCharacter(character);
     }
-  }, []);
+  }, [profile?.characterType, profile?.isRegistered]);
 
-  const xpPercentage = (levelData.xp / levelData.nextLevelXp) * 100;
+  // Redirect to onboarding if wallet is not connected
+  useEffect(() => {
+    if (!isConnected) {
+      const timer = setTimeout(() => {
+        if (typeof window !== 'undefined') {
+          window.location.href = '/onboarding';
+        }
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [isConnected]);
+
+  // Calculate XP percentage for progress bar
+  const xpNeededForCurrentLevel = nextLevelCumulativeXp - remainingXp;
+  const xpPercentage = remainingXp > 0 ? ((currentXp - xpNeededForCurrentLevel) / remainingXp) * 100 : 0;
   const completedTasks = dailyTasks.filter(task => task.completed).length;
+
+  // Show loading state if not connected or profile loading
+  if (!isConnected || isProfileLoading || isNextLevelLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center space-y-4 max-w-xs w-full">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black mx-auto"></div>
+          <div className="space-y-2">
+            <p className="text-gray-900 font-medium">Loading Homepage...</p>
+            <p className="text-gray-600 text-sm">Fetching your profile data...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Redirect to onboarding if user is not registered
+  if (isConnected && profile && !profile.isRegistered) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center space-y-4 max-w-xs w-full">
+          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
+            <span className="text-blue-600 text-xl">ℹ</span>
+          </div>
+          <div className="space-y-2">
+            <p className="text-gray-900 font-medium">Please Register First</p>
+            <p className="text-gray-600 text-sm">You need to register to access the homepage.</p>
+            <button
+              onClick={() => window.location.href = '/onboarding'}
+              className="mt-4 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              Register Now
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white pb-20">
@@ -63,8 +126,8 @@ export default function Homepage() {
         <div className="flex items-center justify-between mb-8 p-4 border border-gray-100 rounded-xl bg-gray-200/30">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Welcome back</h1>
-            <p>Bima Jadiva!</p>
-            <p className="text-gray-500 text-sm mt-1">Level {levelData.level} • {levelData.xp} XP</p>
+            <p>{profile?.name || "Anonymous User"}!</p>
+            <p className="text-gray-500 text-sm mt-1">Level {profile?.level || 1} • {currentXp} XP</p>
           </div>
           <div className="w-16 h-16">
             <Lottie 
@@ -76,17 +139,17 @@ export default function Homepage() {
 
         <div className="mb-8 p-4 border border-gray-100 rounded-xl bg-gray-50/30">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium text-gray-600">{levelData.xp} XP</span>
-            <span className="text-sm text-gray-400">{levelData.nextLevelXp} XP</span>
+            <span className="text-sm font-medium text-gray-600">{currentXp} XP</span>
+            <span className="text-sm text-gray-400">{nextLevelCumulativeXp} XP</span>
           </div>
           <div className="w-full bg-gray-100 rounded-full h-2">
             <div 
               className="bg-black h-2 rounded-full transition-all duration-500"
-              style={{ width: `${xpPercentage}%` }}
+              style={{ width: `${Math.min(Math.max(xpPercentage, 0), 100)}%` }}
             ></div>
           </div>
           <p className="text-xs text-gray-400 mt-2 text-center">
-            {levelData.nextLevelXp - levelData.xp} XP to Level {levelData.level + 1}
+            {remainingXp > 0 ? `${remainingXp} XP to Level ${(profile?.level || 1) + 1}` : 'Max Level Reached'}
           </p>
         </div>
 
