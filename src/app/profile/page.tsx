@@ -7,6 +7,7 @@ import { Trophy, Calendar, Activity, Wallet } from "lucide-react";
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
 import { useGetProfile } from '../../hooks/useGetProfile';
+import { useGetNextLevelXp } from '../../hooks/useGetNextLevelXP';
 import { CHARACTER_TYPES } from '../../hooks/useRegister';
 import Lottie from "lottie-react";
 import degenCharacter from "../../../public/Assets/Animation/degen-character.json";
@@ -20,6 +21,7 @@ function ProfileContent() {
   const [mounted, setMounted] = useState(false);
   const { isConnected, address } = useAccount();
   const { profile, isLoading: isProfileLoading, error: profileError } = useGetProfile(address);
+  const { nextLevelXp: nextLevelData, isLoading: isNextLevelLoading } = useGetNextLevelXp(address);
   
   // Remove mock data - will use real profile data
 
@@ -73,10 +75,12 @@ function ProfileContent() {
     }
   }, [isConnected]);
 
-  // Calculate dynamic data from profile
+  // Calculate dynamic data from profile and smart contract
   const currentXp = profile?.xp ? Number(profile.xp) : 0;
-  const nextLevelXp = 1000 * (profile?.level ? profile.level + 1 : 1); // Simple formula: level * 1000
-  const xpPercentage = nextLevelXp > 0 ? (currentXp / nextLevelXp) * 100 : 0;
+  const remainingXp = nextLevelData?.remaining ? Number(nextLevelData.remaining) : 0;
+  const nextLevelCumulativeXp = nextLevelData?.nextLevelCumulative ? Number(nextLevelData.nextLevelCumulative) : 1000;
+  const xpNeededForCurrentLevel = nextLevelCumulativeXp - remainingXp;
+  const xpPercentage = nextLevelCumulativeXp > 0 ? ((currentXp - xpNeededForCurrentLevel) / remainingXp) * 100 : 0;
   const unlockedAchievements = achievements.filter(a => a.unlocked).length;
 
   // Prevent hydration mismatch
@@ -94,7 +98,7 @@ function ProfileContent() {
   }
 
   // Show loading state while fetching profile
-  if (isConnected && isProfileLoading) {
+  if (isConnected && (isProfileLoading || isNextLevelLoading)) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center space-y-4 max-w-xs w-full">
@@ -192,16 +196,16 @@ function ProfileContent() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-medium text-gray-600">Level {profile?.level || 1}</span>
-            <span className="text-sm text-gray-400">{currentXp}/{nextLevelXp} XP</span>
+            <span className="text-sm text-gray-400">{currentXp} XP</span>
           </div>
           <div className="w-full bg-gray-100 rounded-full h-2">
             <div 
               className="bg-black h-2 rounded-full transition-all duration-500"
-              style={{ width: `${xpPercentage}%` }}
+              style={{ width: `${Math.min(Math.max(xpPercentage, 0), 100)}%` }}
             ></div>
           </div>
           <p className="text-xs text-gray-400 mt-2 text-center">
-            {nextLevelXp - currentXp} XP to Level {(profile?.level || 1) + 1}
+            {remainingXp > 0 ? `${remainingXp} XP to Level ${(profile?.level || 1) + 1}` : 'Max Level Reached'}
           </p>
         </div>
 
@@ -285,7 +289,6 @@ function ProfileContent() {
                   account,
                   chain,
                   openAccountModal,
-                  openChainModal,
                   openConnectModal,
                   mounted,
                 }) => {
