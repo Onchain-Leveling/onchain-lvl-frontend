@@ -279,7 +279,7 @@ export default function CharacterSelection() {
           </div>
         )}
 
-        {selectedCharacter && playerName.trim() && (
+        {selectedCharacter && playerName.trim() && !isSuccess && (
           <div className="space-y-4">
             {error && (
               <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
@@ -293,7 +293,7 @@ export default function CharacterSelection() {
                 register(playerName.trim(), characterType);
               }}
               disabled={isPending || isConfirming}
-              className="inline-flex items-center justify-center w-full px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center justify-center w-full px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isPending && "Preparing transaction..."}
               {isConfirming && "Confirming registration..."}
@@ -314,9 +314,9 @@ export default function CharacterSelection() {
                   window.location.href = '/';
                 }
               }}
-              className="inline-flex items-center justify-center w-full px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+              className="inline-flex items-center justify-center w-full px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium"
             >
-              Continue to Dashboard
+              Start Your Journey
             </button>
           </div>
         )}
