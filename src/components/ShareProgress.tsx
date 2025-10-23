@@ -50,8 +50,7 @@ Building healthy habits onchain! 💪
     const encodedText = encodeURIComponent(shareText);
     const urls = {
       twitter: `https://twitter.com/intent/tweet?text=${encodedText}`,
-      farcaster: `https://warpcast.com/~/compose?text=${encodedText}`,
-      telegram: `https://t.me/share/url?text=${encodedText}`
+      farcaster: `https://warpcast.com/~/compose?text=${encodedText}`
     };
     
     window.open(urls[platform as keyof typeof urls], "_blank");
@@ -188,10 +187,10 @@ Building healthy habits onchain! 💪
               </div>
             )}
 
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => shareToSocial("twitter")}
-                className="flex items-center justify-center space-x-1 px-3 py-2 bg-gray-800 text-white rounded-lg hover:bg-black transition-colors text-sm font-medium"
+                className="flex items-center justify-center space-x-2 px-4 py-3 bg-gray-800 text-white rounded-lg hover:bg-black transition-colors text-sm font-medium"
               >
                 <span>𝕏</span>
                 <span>Twitter</span>
@@ -199,18 +198,16 @@ Building healthy habits onchain! 💪
               
               <button
                 onClick={() => shareToSocial("farcaster")}
-                className="flex items-center justify-center space-x-1 px-3 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium"
+                className="flex items-center justify-center space-x-2 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
               >
-                <span>🟣</span>
+                <Image
+                  src="/Assets/Logo/farcaster-logo.jpeg"
+                  alt="Farcaster"
+                  width={16}
+                  height={16}
+                  className="rounded-sm"
+                />
                 <span>Farcaster</span>
-              </button>
-              
-              <button
-                onClick={() => shareToSocial("telegram")}
-                className="flex items-center justify-center space-x-1 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium"
-              >
-                <span>✈️</span>
-                <span>Telegram</span>
               </button>
             </div>
           </div>

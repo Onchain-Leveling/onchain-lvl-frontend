@@ -15,7 +15,7 @@ export default function CharacterSelection() {
   const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
   const [playerName, setPlayerName] = useState("");
   const [loadingProgress, setLoadingProgress] = useState(0);
-  const { isReady } = useFarcaster();
+  const { isReady, navigateToHome } = useFarcaster();
   const { isConnected } = useAccount();
   const { register, isPending, isConfirming, isSuccess, error } = useRegister();
   const { isRegistered, isLoading: isCheckingRegistration, profile } = useRegistrationStatus();
@@ -30,10 +30,11 @@ export default function CharacterSelection() {
         });
       }, 200);
 
-      // Fallback timeout to prevent infinite loading
+      // Much shorter fallback timeout to prevent infinite loading on mobile
       const timeout = setTimeout(() => {
+        console.log('Loading timeout reached, forcing progress to 100');
         setLoadingProgress(100);
-      }, 5000); // 5 second timeout
+      }, 3000); // Reduced to 3 seconds for mobile
 
       return () => {
         clearInterval(interval);
@@ -44,21 +45,31 @@ export default function CharacterSelection() {
     }
   }, [isReady]);
 
+  // Additional safety timeout to force progress after a short time regardless of Farcaster status
+  useEffect(() => {
+    const safetyTimeout = setTimeout(() => {
+      console.log('Safety timeout: Forcing loading completion for mobile devices');
+      setLoadingProgress(100);
+    }, 2000); // 2 second safety net
+
+    return () => clearTimeout(safetyTimeout);
+  }, []);
+
   // Redirect to homepage if user is already registered
   useEffect(() => {
-    if (isConnected && isRegistered && profile) {
-      // Small delay to ensure proper loading states
+    if (isConnected && !isCheckingRegistration && isRegistered && profile) {
+      // Use Farcaster-aware navigation with very short timeout
       const timer = setTimeout(() => {
-        if (typeof window !== 'undefined') {
-          window.location.href = '/';
-        }
-      }, 1000);
+        console.log('Auto-redirecting registered user to Homepage...');
+        navigateToHome();
+      }, 800); // Much shorter delay for better UX
 
       return () => clearTimeout(timer);
     }
-  }, [isConnected, isRegistered, profile]);
+  }, [navigateToHome, isConnected, isCheckingRegistration, isRegistered, profile]);
 
-  if (!isReady && loadingProgress < 100) {
+  // Show loading only if both conditions are met AND we're within the first few seconds
+  if (loadingProgress < 100) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 flex items-center justify-center p-4">
         <div className="text-center space-y-6 max-w-xs w-full">
@@ -91,14 +102,27 @@ export default function CharacterSelection() {
                loadingProgress < 90 ? 'Preparing interface...' :
                'Almost ready!'}
             </p>
+            
+            {/* Show skip button after 3 seconds for mobile users */}
+            {loadingProgress > 50 && (
+              <button 
+                onClick={() => {
+                  console.log('User manually skipped loading');
+                  setLoadingProgress(100);
+                }}
+                className="text-blue-600 text-xs underline hover:text-blue-800 transition-colors mt-2"
+              >
+                Skip loading →
+              </button>
+            )}
           </div>
         </div>
       </div>
     );
   }
 
-  // Show loading while checking registration status
-  if (isConnected && isCheckingRegistration) {
+  // Show loading while checking registration status (only if fully ready)
+  if (isReady && isConnected && isCheckingRegistration) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 flex items-center justify-center p-4">
         <div className="text-center space-y-6 max-w-xs w-full">
@@ -122,42 +146,60 @@ export default function CharacterSelection() {
     );
   }
 
-  // Show welcome message if user is already registered
-  if (isConnected && isRegistered && profile) {
+  // Show welcome message if user is already registered (only after initial loading)
+  if (isReady && isConnected && !isCheckingRegistration && isRegistered && profile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 flex items-center justify-center p-4">
-        <div className="text-center space-y-6 max-w-md w-full">
-          <div className="flex justify-center">
-            <Image
-              src="/Assets/Logo/logo-onchain-leveling.png"
-              alt="Onchain Leveling"
-              width={100}
-              height={80}
-              className="object-contain"
-              priority
-            />
+      <div className="min-h-screen bg-white flex items-center justify-center p-6">
+        <div className="text-center space-y-8 max-w-sm w-full">
+          {/* Logo */}
+          <div className="flex justify-center mb-8">
+            <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center">
+              <Image
+                src="/Assets/Logo/logo-onchain-leveling.png"
+                alt="Onchain Leveling"
+                width={40}
+                height={32}
+                className="object-contain opacity-80"
+                priority
+              />
+            </div>
           </div>
           
-          <div className="space-y-4">
-            <h1 className="text-3xl font-semibold text-gray-900">
-              Welcome back, {profile.name}!
+          {/* Content */}
+          <div className="space-y-3">
+            <h1 className="text-2xl font-medium text-gray-900 tracking-tight">
+              Welcome back, {profile.name}
             </h1>
-            <p className="text-gray-600">
-              You&apos;re already registered. Redirecting to your dashboard...
+            <p className="text-gray-500 text-sm leading-relaxed">
+              Continue your onchain journey
             </p>
           </div>
 
-          <div className="space-y-3">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600 mx-auto"></div>
-            <p className="text-gray-500 text-sm">Taking you to your dashboard</p>
+          {/* Actions */}
+          <div className="space-y-3 pt-4">
+            <button 
+              onClick={() => {
+                console.log('Manual navigation button clicked');
+                navigateToHome();
+              }}
+              className="w-full bg-gray-900 text-white px-6 py-3.5 rounded-xl text-sm font-medium hover:bg-gray-800 transition-all duration-200 ease-out"
+            >
+              Continue
+            </button>
+            
+            {/* Subtle auto-redirect indicator */}
+            <div className="flex items-center justify-center space-x-2 pt-2">
+              <div className="w-1 h-1 bg-gray-300 rounded-full animate-pulse"></div>
+              <p className="text-gray-400 text-xs">Redirecting automatically</p>
+            </div>
           </div>
         </div>
       </div>
     );
   }
 
-  // Show wallet connection step first
-  if (!isConnected) {
+  // Show wallet connection step first (only when fully ready)
+  if (isReady && !isConnected) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 flex items-center justify-center p-4">
         <div className="max-w-md w-full space-y-8 text-center">
@@ -190,6 +232,31 @@ export default function CharacterSelection() {
             <p className="text-sm text-gray-500">
               Your wallet will be used to track your onchain achievements and rewards
             </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show registration form only when ready, connected, and not registered
+  if (!isReady || !isConnected || isCheckingRegistration || isRegistered) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50 flex items-center justify-center p-4">
+        <div className="text-center space-y-6 max-w-xs w-full">
+          <div className="flex justify-center">
+            <Image
+              src="/Assets/Logo/logo-onchain-leveling.png"
+              alt="Onchain Leveling"
+              width={80}
+              height={64}
+              className="object-contain animate-pulse"
+              priority
+            />
+          </div>
+          
+          <div className="space-y-3">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="text-gray-600 text-sm">Loading...</p>
           </div>
         </div>
       </div>
@@ -310,9 +377,8 @@ export default function CharacterSelection() {
             </div>
             <button
               onClick={() => {
-                if (typeof window !== 'undefined') {
-                  window.location.href = '/';
-                }
+                console.log('Start Journey button clicked');
+                navigateToHome();
               }}
               className="inline-flex items-center justify-center w-full px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium"
             >
