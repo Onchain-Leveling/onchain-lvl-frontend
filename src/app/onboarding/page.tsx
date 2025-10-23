@@ -143,7 +143,7 @@ export default function CharacterSelection() {
               Welcome back, {profile.name}!
             </h1>
             <p className="text-gray-600">
-              You're already registered. Redirecting to your dashboard...
+              You&apos;re already registered. Redirecting to your dashboard...
             </p>
           </div>
 

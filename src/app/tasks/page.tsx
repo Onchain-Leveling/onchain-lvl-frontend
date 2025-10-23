@@ -4,24 +4,16 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAccount } from 'wagmi';
-import { useGetTaskList, type TaskDef } from '../../hooks/useGetTaskList';
+import { useGetTaskList } from '../../hooks/useGetTaskList';
 import { useCompleteTask } from '../../hooks/useCompleteTask';
 import { useGetProfile } from '../../hooks/useGetProfile';
 import { CHARACTER_TYPES } from '../../hooks/useRegister';
 import Lottie from "lottie-react";
-import { CheckCircle, Circle } from "lucide-react";
+import { Circle } from "lucide-react";
 import dailyTaskAnimation from "../../../public/Assets/Animation/daily-task.json";
 import BottomNavbar from "../../components/BottomNavbar";
 import SuccessModal from "../../components/SuccessModal";
 
-interface Task {
-  id: string;
-  title: string;
-  current: number;
-  target: number;
-  unit: string;
-  completed: boolean;
-}
 
 function DailyTasksContent() {
   const { isConnected, address } = useAccount();
@@ -75,7 +67,7 @@ function DailyTasksContent() {
   }, [profile?.characterType, profile?.isRegistered, character]);
 
   // Handle complete task
-  const handleCompleteTask = (taskId: bigint, xp: number) => {
+  const handleCompleteTask = (taskId: bigint) => {
     setCompletingTaskId(taskId);
     completeTask(taskId);
   };
@@ -191,7 +183,7 @@ function DailyTasksContent() {
 
                 <div className="flex space-x-2">
                   <button
-                    onClick={() => handleCompleteTask(task.id, task.xp)}
+                    onClick={() => handleCompleteTask(task.id)}
                     disabled={isProcessing || isConfirmingTx}
                     className="w-full px-4 py-2 rounded-xl transition-all text-sm font-semibold bg-black text-white hover:bg-gray-800 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                   >

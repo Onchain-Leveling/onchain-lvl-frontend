@@ -68,7 +68,7 @@ function ProfileContent() {
       const savedCharacter = localStorage.getItem('selectedCharacter') || character || 'degen';
       setSelectedCharacter(savedCharacter);
     }
-  }, [character, profile?.characterType, profile?.isRegistered]);
+  }, [character, profile?.characterType, profile?.isRegistered, router, searchParams]);
 
   // Redirect to onboarding if wallet is disconnected
   useEffect(() => {
