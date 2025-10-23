@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Trophy, Calendar, Activity, Wallet } from "lucide-react";
 import { ConnectButton } from '@rainbow-me/rainbowkit';
@@ -16,6 +16,7 @@ import BottomNavbar from "../../components/BottomNavbar";
 
 function ProfileContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const character = searchParams.get("character") || "degen";
   const [selectedCharacter, setSelectedCharacter] = useState<string>("degen");
   const [mounted, setMounted] = useState(false);
@@ -54,12 +55,20 @@ function ProfileContent() {
       // Set character based on profile data from contract
       const characterFromProfile = profile.characterType === CHARACTER_TYPES.DEGEN ? 'degen' : 'runner';
       setSelectedCharacter(characterFromProfile);
+      
+      // Update URL parameter to match profile character
+      const currentCharacter = searchParams.get("character");
+      if (currentCharacter !== characterFromProfile) {
+        const newSearchParams = new URLSearchParams(searchParams.toString());
+        newSearchParams.set("character", characterFromProfile);
+        router.replace(`/profile?${newSearchParams.toString()}`, { scroll: false });
+      }
     } else if (typeof window !== 'undefined') {
       // Fallback to localStorage if profile not loaded yet
       const savedCharacter = localStorage.getItem('selectedCharacter') || character || 'degen';
       setSelectedCharacter(savedCharacter);
     }
-  }, [character, profile]);
+  }, [character, profile?.characterType, profile?.isRegistered]);
 
   // Redirect to onboarding if wallet is disconnected
   useEffect(() => {
