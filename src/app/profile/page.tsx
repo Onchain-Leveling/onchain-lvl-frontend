@@ -6,6 +6,8 @@ import Link from "next/link";
 import { Trophy, Calendar, Activity, Wallet } from "lucide-react";
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
+import { useGetProfile } from '../../hooks/useGetProfile';
+import { CHARACTER_TYPES } from '../../hooks/useRegister';
 import Lottie from "lottie-react";
 import degenCharacter from "../../../public/Assets/Animation/degen-character.json";
 import runnerCharacter from "../../../public/Assets/Animation/runner-character.json";
@@ -15,18 +17,16 @@ function ProfileContent() {
   const searchParams = useSearchParams();
   const character = searchParams.get("character") || "degen";
   const [selectedCharacter, setSelectedCharacter] = useState<string>("degen");
-  const { isConnected } = useAccount();
+  const [mounted, setMounted] = useState(false);
+  const { isConnected, address } = useAccount();
+  const { profile, isLoading: isProfileLoading, error: profileError } = useGetProfile(address);
   
-  const [userData] = useState({
-    name: "Bima Jadiva",
-    username: "bimajdv7",
-    level: 5,
-    xp: 1250,
-    nextLevelXp: 1500,
-    joinDate: "October 2024",
-    totalActivities: 28,
-    streak: 7
-  });
+  // Remove mock data - will use real profile data
+
+  // Handle hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const [achievements] = useState([
     { id: 1, title: "First Steps", description: "Complete your first activity", unlocked: true },
@@ -48,11 +48,16 @@ function ProfileContent() {
   ]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (profile?.isRegistered && profile.characterType) {
+      // Set character based on profile data from contract
+      const characterFromProfile = profile.characterType === CHARACTER_TYPES.DEGEN ? 'degen' : 'runner';
+      setSelectedCharacter(characterFromProfile);
+    } else if (typeof window !== 'undefined') {
+      // Fallback to localStorage if profile not loaded yet
       const savedCharacter = localStorage.getItem('selectedCharacter') || character || 'degen';
       setSelectedCharacter(savedCharacter);
     }
-  }, [character]);
+  }, [character, profile]);
 
   // Redirect to onboarding if wallet is disconnected
   useEffect(() => {
@@ -68,8 +73,86 @@ function ProfileContent() {
     }
   }, [isConnected]);
 
-  const xpPercentage = (userData.xp / userData.nextLevelXp) * 100;
+  // Calculate dynamic data from profile
+  const currentXp = profile?.xp ? Number(profile.xp) : 0;
+  const nextLevelXp = 1000 * (profile?.level ? profile.level + 1 : 1); // Simple formula: level * 1000
+  const xpPercentage = nextLevelXp > 0 ? (currentXp / nextLevelXp) * 100 : 0;
   const unlockedAchievements = achievements.filter(a => a.unlocked).length;
+
+  // Prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center space-y-4 max-w-xs w-full">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black mx-auto"></div>
+          <div className="space-y-2">
+            <p className="text-gray-900 font-medium">Loading...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading state while fetching profile
+  if (isConnected && isProfileLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center space-y-4 max-w-xs w-full">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black mx-auto"></div>
+          <div className="space-y-2">
+            <p className="text-gray-900 font-medium">Loading Profile...</p>
+            <p className="text-gray-600 text-sm">Fetching your onchain data...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if profile failed to load
+  if (isConnected && profileError) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center space-y-4 max-w-xs w-full">
+          <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto">
+            <span className="text-red-600 text-xl">⚠</span>
+          </div>
+          <div className="space-y-2">
+            <p className="text-gray-900 font-medium">Profile Load Failed</p>
+            <p className="text-gray-600 text-sm">Unable to fetch your profile data. Please try again.</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Redirect to onboarding if user is not registered
+  if (isConnected && profile && !profile.isRegistered) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center space-y-4 max-w-xs w-full">
+          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
+            <span className="text-blue-600 text-xl">ℹ</span>
+          </div>
+          <div className="space-y-2">
+            <p className="text-gray-900 font-medium">Profile Not Found</p>
+            <p className="text-gray-600 text-sm">You need to register first to access your profile.</p>
+            <button
+              onClick={() => window.location.href = '/onboarding'}
+              className="mt-4 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              Register Now
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Show loading state when wallet is disconnected and redirecting
   if (!isConnected) {
@@ -96,20 +179,20 @@ function ProfileContent() {
               loop={true} 
             />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">{userData.name}</h1>
-          <p className="text-gray-500 text-sm">@{userData.username}</p>
+          <h1 className="text-2xl font-bold text-gray-900">{profile?.name || "Anonymous User"}</h1>
+          <p className="text-gray-500 text-sm">@{address?.slice(0, 6)}...{address?.slice(-4)}</p>
           <div className="flex items-center justify-center space-x-2 mt-2">
             <span className="px-3 py-1 bg-black text-white rounded-full text-xs font-medium">
               {selectedCharacter === "degen" ? "Degen" : "Runner"}
             </span>
-            <span className="text-xs text-gray-400">• {userData.joinDate}</span>
+            <span className="text-xs text-gray-400">• Registered User</span>
           </div>
         </div>
 
         <div className="mb-8">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium text-gray-600">Level {userData.level}</span>
-            <span className="text-sm text-gray-400">{userData.xp}/{userData.nextLevelXp} XP</span>
+            <span className="text-sm font-medium text-gray-600">Level {profile?.level || 1}</span>
+            <span className="text-sm text-gray-400">{currentXp}/{nextLevelXp} XP</span>
           </div>
           <div className="w-full bg-gray-100 rounded-full h-2">
             <div 
@@ -118,22 +201,22 @@ function ProfileContent() {
             ></div>
           </div>
           <p className="text-xs text-gray-400 mt-2 text-center">
-            {userData.nextLevelXp - userData.xp} XP to Level {userData.level + 1}
+            {nextLevelXp - currentXp} XP to Level {(profile?.level || 1) + 1}
           </p>
         </div>
 
         <div className="grid grid-cols-3 gap-4 mb-8">
           <div className="text-center p-4 bg-gray-50 rounded-xl">
-            <div className="text-2xl font-bold text-gray-900 mb-1">{userData.level}</div>
+            <div className="text-2xl font-bold text-gray-900 mb-1">{profile?.level || 1}</div>
             <div className="text-xs text-gray-500">Level</div>
           </div>
           <div className="text-center p-4 bg-gray-50 rounded-xl">
-            <div className="text-2xl font-bold text-gray-900 mb-1">{userData.totalActivities}</div>
-            <div className="text-xs text-gray-500">Activities</div>
+            <div className="text-2xl font-bold text-gray-900 mb-1">{currentXp}</div>
+            <div className="text-xs text-gray-500">Total XP</div>
           </div>
           <div className="text-center p-4 bg-gray-50 rounded-xl">
-            <div className="text-2xl font-bold text-gray-900 mb-1">{userData.streak}</div>
-            <div className="text-xs text-gray-500">Day Streak</div>
+            <div className="text-lg font-bold text-gray-900 mb-1">{selectedCharacter === "degen" ? "DEGEN" : "RUNNER"}</div>
+            <div className="text-xs text-gray-500">Character</div>
           </div>
         </div>
 
