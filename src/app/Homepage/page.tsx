@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { CheckCircle, Clock, Users } from "lucide-react";
 import { useAccount } from 'wagmi';
 import { useGetProfile } from '../../hooks/useGetProfile';
@@ -102,12 +103,19 @@ export default function Homepage() {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center space-y-4 max-w-xs w-full">
-          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
-            <span className="text-blue-600 text-xl">ℹ</span>
+          <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto">
+            <Image
+              src="/Assets/Logo/logo-onchain-leveling.png"
+              alt="Onchain Leveling"
+              width={40}
+              height={32}
+              className="object-contain"
+              priority
+            />
           </div>
           <div className="space-y-2">
             <p className="text-gray-900 font-medium">Please Register First</p>
-            <p className="text-gray-600 text-sm">You need to register to access the homepage.</p>
+            <p className="text-gray-600 text-sm">You need to register to Start your Onchain Journey.</p>
             <button
               onClick={() => window.location.href = '/onboarding'}
               className="mt-4 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"

@@ -55,16 +55,12 @@ export default function CharacterSelection() {
     return () => clearTimeout(safetyTimeout);
   }, []);
 
-  // Redirect to homepage if user is already registered
+  // Redirect to homepage if user is already registered (immediate redirect)
   useEffect(() => {
     if (isConnected && !isCheckingRegistration && isRegistered && profile) {
-      // Use Farcaster-aware navigation with very short timeout
-      const timer = setTimeout(() => {
-        console.log('Auto-redirecting registered user to Homepage...');
-        navigateToHome();
-      }, 800); // Much shorter delay for better UX
-
-      return () => clearTimeout(timer);
+      // Immediate redirect without showing welcome screen
+      console.log('User already registered, redirecting immediately to Homepage...');
+      navigateToHome();
     }
   }, [navigateToHome, isConnected, isCheckingRegistration, isRegistered, profile]);
 
@@ -146,53 +142,13 @@ export default function CharacterSelection() {
     );
   }
 
-  // Show welcome message if user is already registered (only after initial loading)
+  // If user is already registered, show minimal loading while redirecting
   if (isReady && isConnected && !isCheckingRegistration && isRegistered && profile) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center p-6">
-        <div className="text-center space-y-8 max-w-sm w-full">
-          {/* Logo */}
-          <div className="flex justify-center mb-8">
-            <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center">
-              <Image
-                src="/Assets/Logo/logo-onchain-leveling.png"
-                alt="Onchain Leveling"
-                width={40}
-                height={32}
-                className="object-contain opacity-80"
-                priority
-              />
-            </div>
-          </div>
-          
-          {/* Content */}
-          <div className="space-y-3">
-            <h1 className="text-2xl font-medium text-gray-900 tracking-tight">
-              Welcome back, {profile.name}
-            </h1>
-            <p className="text-gray-500 text-sm leading-relaxed">
-              Continue your onchain journey
-            </p>
-          </div>
-
-          {/* Actions */}
-          <div className="space-y-3 pt-4">
-            <button 
-              onClick={() => {
-                console.log('Manual navigation button clicked');
-                navigateToHome();
-              }}
-              className="w-full bg-gray-900 text-white px-6 py-3.5 rounded-xl text-sm font-medium hover:bg-gray-800 transition-all duration-200 ease-out"
-            >
-              Continue
-            </button>
-            
-            {/* Subtle auto-redirect indicator */}
-            <div className="flex items-center justify-center space-x-2 pt-2">
-              <div className="w-1 h-1 bg-gray-300 rounded-full animate-pulse"></div>
-              <p className="text-gray-400 text-xs">Redirecting automatically</p>
-            </div>
-          </div>
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="text-gray-600 text-sm">Redirecting to homepage...</p>
         </div>
       </div>
     );

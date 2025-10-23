@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     console.error('Frame API error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-}
+} 
 
 export async function GET() {
   return NextResponse.json({ message: 'Frame API endpoint' });
